@@ -117,7 +117,7 @@ MANHWA | Tower of God | WISHLIST | action |  | 0/0 | Heard good things
 ```
 
 - `PREF` line stores the profile (exactly one line, present after onboarding).
-- `MANHWA` fields: `type | title | status | tags(comma-separated) | ratings(semicolon-separated key=value) | current/total chapters | note`.
+- `MANHWA` fields: `type | title | status | tags(comma-separated) | ratings(semicolon-separated key=value) | current/total chapters | note | dateAdded`.
 - Ratings, chapters (`0/0`), and note may be empty / default.
 - On load: parse line by line; a corrupt line is skipped with a warning printed to
   stderr — never crash the app. A missing `PREF` line is handled gracefully (no
