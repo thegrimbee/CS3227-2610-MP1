@@ -282,7 +282,7 @@ JUnit 5 (Gradle `test` task, JUnit Platform):
 
 ## 9. Build setup
 
-- Gradle with `application` + `com.github.johnrengelman.shadow` plugins (v7.1.2).
+- Gradle with `application` + `com.github.johnrengelman.shadow` plugins (v9.6.1).
 - `mainClass = manhwa.CliMain`; fat JAR named `manhwadex`.
 - `run { standardInput = System.in }` so the CLI works under Gradle.
 - No other production dependencies (Swing ships with the JDK).
