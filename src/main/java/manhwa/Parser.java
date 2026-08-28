@@ -10,6 +10,7 @@ import manhwa.commands.ListCommand;
 import manhwa.commands.OnboardCommand;
 import manhwa.commands.RateCommand;
 import manhwa.commands.RerankCommand;
+import manhwa.commands.SortCommand;
 import manhwa.commands.StatusCommand;
 
 /**
@@ -38,6 +39,8 @@ public final class Parser {
             "Invalid status command. Expected format: status <index> <status>.";
     private static final String INVALID_RATING_MESSAGE =
             "Rating must be an integer from 1 to 10.";
+    private static final String INVALID_SORT_MESSAGE =
+            "Invalid sort command. Expected format: sort <key>.";
 
     private Parser() {
     }
@@ -62,6 +65,7 @@ public final class Parser {
         case OnboardCommand.COMMAND_WORD -> parseOnboardCommand(input);
         case RateCommand.COMMAND_WORD -> parseRateCommand(input);
         case RerankCommand.COMMAND_WORD -> parseRerankCommand(input);
+        case SortCommand.COMMAND_WORD -> parseSortCommand(input);
         case StatusCommand.COMMAND_WORD -> parseStatusCommand(input);
         default -> throw new ManhwaTrackerException(UNKNOWN_COMMAND_MESSAGE);
         };
@@ -113,6 +117,14 @@ public final class Parser {
         }
         int index = parseIndex(arguments[0], INVALID_STATUS_MESSAGE);
         return new StatusCommand(index, Status.fromString(arguments[1]));
+    }
+
+    private static Command parseSortCommand(String input) throws ManhwaTrackerException {
+        String arguments = getArguments(input);
+        if (arguments.isEmpty() || arguments.split("\\s+").length != 1) {
+            throw new ManhwaTrackerException(INVALID_SORT_MESSAGE);
+        }
+        return new SortCommand(SortKey.fromString(arguments));
     }
 
     private static Command parseListCommand(String input) throws ManhwaTrackerException {
