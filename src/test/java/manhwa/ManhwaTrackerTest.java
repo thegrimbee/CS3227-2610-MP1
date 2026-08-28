@@ -27,7 +27,7 @@ class ManhwaTrackerTest {
 
         assertEquals(
                 "Unknown command. Type `help` to see available commands.",
-                tracker.getResponse("list"));
+                tracker.getResponse("ajglskgj"));
         assertFalse(tracker.isExit());
     }
 
