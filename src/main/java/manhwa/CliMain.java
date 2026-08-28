@@ -27,6 +27,7 @@ public final class CliMain {
         try {
             ManhwaTracker tracker = createTracker();
             ui.showWelcome();
+            showStartupPrompt(ui, tracker);
             runCommandLoop(scanner, ui, tracker);
         } catch (IOException exception) {
             ui.showMessage(STARTUP_ERROR_MESSAGE + exception.getMessage());
@@ -39,6 +40,15 @@ public final class CliMain {
         LoadResult loadResult = storage.loadData();
         return new ManhwaTracker(
                 loadResult.getManhwaList(), loadResult.getPreferenceProfile(), storage);
+    }
+
+    private static void showStartupPrompt(Ui ui, ManhwaTracker tracker) {
+        assert ui != null;
+        assert tracker != null;
+        String startupPrompt = tracker.startOnboardingIfNeeded();
+        if (startupPrompt != null) {
+            ui.showMessage(startupPrompt);
+        }
     }
 
     private static void runCommandLoop(Scanner scanner, Ui ui, ManhwaTracker tracker) {

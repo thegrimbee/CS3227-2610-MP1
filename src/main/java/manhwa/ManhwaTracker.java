@@ -15,8 +15,18 @@ public class ManhwaTracker {
             "Please answer wishlist, ongoing, or completed.";
     private static final String RATING_ERROR_PREFIX =
             "Rating must be an integer from 1 to 10. ";
+    private static final String IMPORTANCE_ERROR_PREFIX =
+            "Importance must be an integer from 1 to 5. ";
+    private static final String ONBOARDING_GREETING =
+            "Let's set up your scoring preferences! "
+                    + "Rate how important each aspect is from 1 to 5.";
+    private static final String PREFERENCES_SAVED_MESSAGE =
+            "Preferences saved! Overall scores will now use your priorities. "
+                    + "You can change your scoring mechanism by rerunning the onboard command.";
     private static final int MIN_RATING = 1;
     private static final int MAX_RATING = 10;
+    private static final int MIN_IMPORTANCE = 1;
+    private static final int MAX_IMPORTANCE = 5;
 
     private final ManhwaList manhwaList;
     private PreferenceProfile profile;
@@ -82,6 +92,31 @@ public class ManhwaTracker {
     }
 
     /**
+     * Starts collecting a new preference profile.
+     *
+     * @return prompt for the first aspect's importance
+     */
+    public String startOnboardingFlow() {
+        pendingProfile = new PreferenceProfile();
+        nextAspectIndex = 0;
+        state = ConversationState.AWAITING_IMPORTANCE;
+        return ONBOARDING_GREETING + System.lineSeparator()
+                + getImportancePrompt(Aspect.values()[nextAspectIndex]);
+    }
+
+    /**
+     * Starts onboarding when no preference profile was loaded.
+     *
+     * @return the first onboarding prompt, or {@code null} when a profile already exists
+     */
+    public String startOnboardingIfNeeded() {
+        if (profile != null || state != ConversationState.IDLE) {
+            return null;
+        }
+        return startOnboardingFlow();
+    }
+
+    /**
      * Returns the current conversation state.
      *
      * @return current state
@@ -107,8 +142,7 @@ public class ManhwaTracker {
         return switch (state) {
         case AWAITING_STATUS -> handleStatusInput(input);
         case AWAITING_RATINGS -> handleRatingInput(input);
-        case AWAITING_IMPORTANCE -> throw new IllegalStateException(
-                "Importance conversation has not been started.");
+        case AWAITING_IMPORTANCE -> handleImportanceInput(input);
         case IDLE -> throw new IllegalStateException("No conversation is in progress.");
         };
     }
@@ -129,6 +163,22 @@ public class ManhwaTracker {
         nextAspectIndex = 0;
         state = ConversationState.AWAITING_RATINGS;
         return getRatingPrompt(Aspect.values()[nextAspectIndex]);
+    }
+
+    private String handleImportanceInput(String input) throws ManhwaTrackerException {
+        assert pendingProfile != null;
+        Aspect aspect = Aspect.values()[nextAspectIndex];
+        Integer importance = parseImportance(input);
+        if (importance == null) {
+            return IMPORTANCE_ERROR_PREFIX + getImportancePrompt(aspect);
+        }
+
+        pendingProfile.setWeight(aspect, importance);
+        nextAspectIndex++;
+        if (nextAspectIndex == Aspect.values().length) {
+            return finishOnboarding();
+        }
+        return getImportancePrompt(Aspect.values()[nextAspectIndex]);
     }
 
     private String handleRatingInput(String input) throws ManhwaTrackerException {
@@ -159,11 +209,28 @@ public class ManhwaTracker {
         return null;
     }
 
+    private Integer parseImportance(String input) {
+        try {
+            int importance = Integer.parseInt(input.trim());
+            if (importance >= MIN_IMPORTANCE && importance <= MAX_IMPORTANCE) {
+                return importance;
+            }
+        } catch (NumberFormatException exception) {
+            return null;
+        }
+        return null;
+    }
+
     private String getRatingPrompt(Aspect aspect) {
         assert aspect != null;
         assert pendingManhwa != null;
         return "Rate " + aspect.getDisplayName() + " (1-10) for \""
                 + pendingManhwa.getTitle() + "\":";
+    }
+
+    private String getImportancePrompt(Aspect aspect) {
+        assert aspect != null;
+        return "Importance of " + aspect.getDisplayName() + " (1-5):";
     }
 
     private String finishAdd() throws ManhwaTrackerException {
@@ -178,6 +245,14 @@ public class ManhwaTracker {
         storage.saveData(manhwaList, profile);
         resetConversation();
         return getAddConfirmation(completedManhwa);
+    }
+
+    private String finishOnboarding() {
+        assert pendingProfile != null;
+        profile = pendingProfile;
+        storage.saveData(manhwaList, profile);
+        resetConversation();
+        return PREFERENCES_SAVED_MESSAGE;
     }
 
     private String getAddConfirmation(Manhwa manhwa) {

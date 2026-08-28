@@ -7,6 +7,8 @@ import manhwa.commands.Command;
 import manhwa.commands.DeleteCommand;
 import manhwa.commands.FindCommand;
 import manhwa.commands.ListCommand;
+import manhwa.commands.OnboardCommand;
+import manhwa.commands.RerankCommand;
 
 /**
  * Parses user input into validated command objects.
@@ -24,6 +26,10 @@ public final class Parser {
             "Invalid add command. Expected format: add <title>.";
     private static final String INVALID_CANCEL_MESSAGE =
             "Invalid cancel command. Expected format: cancel.";
+    private static final String INVALID_ONBOARD_MESSAGE =
+            "Invalid onboard command. Expected format: onboard.";
+    private static final String INVALID_RERANK_MESSAGE =
+            "Invalid rerank command. Expected format: rerank.";
 
     private Parser() {
     }
@@ -45,6 +51,8 @@ public final class Parser {
         case ListCommand.COMMAND_WORD -> parseListCommand(input);
         case DeleteCommand.COMMAND_WORD -> parseDeleteCommand(input);
         case FindCommand.COMMAND_WORD -> parseFindCommand(input);
+        case OnboardCommand.COMMAND_WORD -> parseOnboardCommand(input);
+        case RerankCommand.COMMAND_WORD -> parseRerankCommand(input);
         default -> throw new ManhwaTrackerException(UNKNOWN_COMMAND_MESSAGE);
         };
     }
@@ -62,6 +70,16 @@ public final class Parser {
             throw new ManhwaTrackerException(INVALID_CANCEL_MESSAGE);
         }
         return new CancelCommand();
+    }
+
+    private static Command parseOnboardCommand(String input) throws ManhwaTrackerException {
+        validateNoArguments(input, INVALID_ONBOARD_MESSAGE);
+        return new OnboardCommand();
+    }
+
+    private static Command parseRerankCommand(String input) throws ManhwaTrackerException {
+        validateNoArguments(input, INVALID_RERANK_MESSAGE);
+        return new RerankCommand();
     }
 
     private static Command parseListCommand(String input) throws ManhwaTrackerException {
@@ -109,5 +127,13 @@ public final class Parser {
             return "";
         }
         return commandParts[1].trim();
+    }
+
+    private static void validateNoArguments(String input, String errorMessage)
+            throws ManhwaTrackerException {
+        assert errorMessage != null;
+        if (!getArguments(input).isEmpty()) {
+            throw new ManhwaTrackerException(errorMessage);
+        }
     }
 }
