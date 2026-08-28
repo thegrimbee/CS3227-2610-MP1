@@ -117,7 +117,7 @@ MANHWA | Tower of God | WISHLIST | action |  | 0/0 | Heard good things
 ```
 
 - `PREF` line stores the profile (exactly one line, present after onboarding).
-- `MANHWA` fields: `type | title | status | tags(comma-separated) | ratings(semicolon-separated key=value) | current/total chapters | note`.
+- `MANHWA` fields: `type | title | status | tags(comma-separated) | ratings(semicolon-separated key=value) | current/total chapters | note | dateAdded`.
 - Ratings, chapters (`0/0`), and note may be empty / default.
 - On load: parse line by line; a corrupt line is skipped with a warning printed to
   stderr — never crash the app. A missing `PREF` line is handled gracefully (no
@@ -282,7 +282,7 @@ JUnit 5 (Gradle `test` task, JUnit Platform):
 
 ## 9. Build setup
 
-- Gradle with `application` + `com.github.johnrengelman.shadow` plugins (v7.1.2).
+- Gradle with `application` + `com.github.johnrengelman.shadow` plugins (v9.7.1).
 - `mainClass = manhwa.CliMain`; fat JAR named `manhwadex`.
 - `run { standardInput = System.in }` so the CLI works under Gradle.
 - No other production dependencies (Swing ships with the JDK).
