@@ -2,6 +2,9 @@ package manhwa;
 
 import manhwa.commands.ByeCommand;
 import manhwa.commands.Command;
+import manhwa.commands.DeleteCommand;
+import manhwa.commands.FindCommand;
+import manhwa.commands.ListCommand;
 
 /**
  * Parses user input into validated command objects.
@@ -9,6 +12,12 @@ import manhwa.commands.Command;
 public final class Parser {
     private static final String UNKNOWN_COMMAND_MESSAGE =
             "Unknown command. Type `help` to see available commands.";
+    private static final String INVALID_LIST_MESSAGE =
+            "Invalid list command. Expected format: list [status].";
+    private static final String INVALID_DELETE_MESSAGE =
+            "Invalid delete command. Expected format: delete <index>.";
+    private static final String INVALID_FIND_MESSAGE =
+            "Invalid find command. Expected format: find <keyword>.";
 
     private Parser() {
     }
@@ -25,8 +34,42 @@ public final class Parser {
         String commandWord = getFirstWord(input);
         return switch (commandWord) {
         case ByeCommand.COMMAND_WORD -> new ByeCommand();
+        case ListCommand.COMMAND_WORD -> parseListCommand(input);
+        case DeleteCommand.COMMAND_WORD -> parseDeleteCommand(input);
+        case FindCommand.COMMAND_WORD -> parseFindCommand(input);
         default -> throw new ManhwaTrackerException(UNKNOWN_COMMAND_MESSAGE);
         };
+    }
+
+    private static Command parseListCommand(String input) throws ManhwaTrackerException {
+        String arguments = getArguments(input);
+        if (arguments.isEmpty()) {
+            return new ListCommand();
+        }
+        if (arguments.split("\\s+").length != 1) {
+            throw new ManhwaTrackerException(INVALID_LIST_MESSAGE);
+        }
+        return new ListCommand(Status.fromString(arguments));
+    }
+
+    private static Command parseDeleteCommand(String input) throws ManhwaTrackerException {
+        String arguments = getArguments(input);
+        if (arguments.isEmpty() || arguments.split("\\s+").length != 1) {
+            throw new ManhwaTrackerException(INVALID_DELETE_MESSAGE);
+        }
+        try {
+            return new DeleteCommand(Integer.parseInt(arguments));
+        } catch (NumberFormatException exception) {
+            throw new ManhwaTrackerException(INVALID_DELETE_MESSAGE);
+        }
+    }
+
+    private static Command parseFindCommand(String input) throws ManhwaTrackerException {
+        String keyword = getArguments(input);
+        if (keyword.isEmpty()) {
+            throw new ManhwaTrackerException(INVALID_FIND_MESSAGE);
+        }
+        return new FindCommand(keyword);
     }
 
     private static String getFirstWord(String input) {
@@ -35,5 +78,13 @@ public final class Parser {
             return "";
         }
         return trimmedInput.split("\\s+")[0];
+    }
+
+    private static String getArguments(String input) {
+        String[] commandParts = input.trim().split("\\s+", 2);
+        if (commandParts.length < 2) {
+            return "";
+        }
+        return commandParts[1].trim();
     }
 }
