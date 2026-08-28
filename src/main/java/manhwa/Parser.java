@@ -1,6 +1,8 @@
 package manhwa;
 
+import manhwa.commands.AddCommand;
 import manhwa.commands.ByeCommand;
+import manhwa.commands.CancelCommand;
 import manhwa.commands.Command;
 import manhwa.commands.DeleteCommand;
 import manhwa.commands.FindCommand;
@@ -18,6 +20,10 @@ public final class Parser {
             "Invalid delete command. Expected format: delete <index>.";
     private static final String INVALID_FIND_MESSAGE =
             "Invalid find command. Expected format: find <keyword>.";
+    private static final String INVALID_ADD_MESSAGE =
+            "Invalid add command. Expected format: add <title>.";
+    private static final String INVALID_CANCEL_MESSAGE =
+            "Invalid cancel command. Expected format: cancel.";
 
     private Parser() {
     }
@@ -33,12 +39,29 @@ public final class Parser {
         assert input != null;
         String commandWord = getFirstWord(input);
         return switch (commandWord) {
+        case AddCommand.COMMAND_WORD -> parseAddCommand(input);
         case ByeCommand.COMMAND_WORD -> new ByeCommand();
+        case CancelCommand.COMMAND_WORD -> parseCancelCommand(input);
         case ListCommand.COMMAND_WORD -> parseListCommand(input);
         case DeleteCommand.COMMAND_WORD -> parseDeleteCommand(input);
         case FindCommand.COMMAND_WORD -> parseFindCommand(input);
         default -> throw new ManhwaTrackerException(UNKNOWN_COMMAND_MESSAGE);
         };
+    }
+
+    private static Command parseAddCommand(String input) throws ManhwaTrackerException {
+        String title = getArguments(input);
+        if (title.isEmpty()) {
+            throw new ManhwaTrackerException(INVALID_ADD_MESSAGE);
+        }
+        return new AddCommand(title);
+    }
+
+    private static Command parseCancelCommand(String input) throws ManhwaTrackerException {
+        if (!getArguments(input).isEmpty()) {
+            throw new ManhwaTrackerException(INVALID_CANCEL_MESSAGE);
+        }
+        return new CancelCommand();
     }
 
     private static Command parseListCommand(String input) throws ManhwaTrackerException {
