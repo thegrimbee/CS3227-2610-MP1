@@ -8,7 +8,9 @@ import manhwa.commands.DeleteCommand;
 import manhwa.commands.FindCommand;
 import manhwa.commands.ListCommand;
 import manhwa.commands.OnboardCommand;
+import manhwa.commands.RateCommand;
 import manhwa.commands.RerankCommand;
+import manhwa.commands.StatusCommand;
 
 /**
  * Parses user input into validated command objects.
@@ -30,6 +32,12 @@ public final class Parser {
             "Invalid onboard command. Expected format: onboard.";
     private static final String INVALID_RERANK_MESSAGE =
             "Invalid rerank command. Expected format: rerank.";
+    private static final String INVALID_RATE_MESSAGE =
+            "Invalid rate command. Expected format: rate <index> <aspect> <1-10>.";
+    private static final String INVALID_STATUS_MESSAGE =
+            "Invalid status command. Expected format: status <index> <status>.";
+    private static final String INVALID_RATING_MESSAGE =
+            "Rating must be an integer from 1 to 10.";
 
     private Parser() {
     }
@@ -52,7 +60,9 @@ public final class Parser {
         case DeleteCommand.COMMAND_WORD -> parseDeleteCommand(input);
         case FindCommand.COMMAND_WORD -> parseFindCommand(input);
         case OnboardCommand.COMMAND_WORD -> parseOnboardCommand(input);
+        case RateCommand.COMMAND_WORD -> parseRateCommand(input);
         case RerankCommand.COMMAND_WORD -> parseRerankCommand(input);
+        case StatusCommand.COMMAND_WORD -> parseStatusCommand(input);
         default -> throw new ManhwaTrackerException(UNKNOWN_COMMAND_MESSAGE);
         };
     }
@@ -80,6 +90,29 @@ public final class Parser {
     private static Command parseRerankCommand(String input) throws ManhwaTrackerException {
         validateNoArguments(input, INVALID_RERANK_MESSAGE);
         return new RerankCommand();
+    }
+
+    private static Command parseRateCommand(String input) throws ManhwaTrackerException {
+        String[] arguments = getArguments(input).split("\\s+");
+        if (arguments.length != 3) {
+            throw new ManhwaTrackerException(INVALID_RATE_MESSAGE);
+        }
+        int index = parseIndex(arguments[0], INVALID_RATE_MESSAGE);
+        Aspect aspect = Aspect.fromString(arguments[1]);
+        try {
+            return new RateCommand(index, aspect, Integer.parseInt(arguments[2]));
+        } catch (NumberFormatException exception) {
+            throw new ManhwaTrackerException(INVALID_RATING_MESSAGE);
+        }
+    }
+
+    private static Command parseStatusCommand(String input) throws ManhwaTrackerException {
+        String[] arguments = getArguments(input).split("\\s+");
+        if (arguments.length != 2) {
+            throw new ManhwaTrackerException(INVALID_STATUS_MESSAGE);
+        }
+        int index = parseIndex(arguments[0], INVALID_STATUS_MESSAGE);
+        return new StatusCommand(index, Status.fromString(arguments[1]));
     }
 
     private static Command parseListCommand(String input) throws ManhwaTrackerException {
@@ -133,6 +166,17 @@ public final class Parser {
             throws ManhwaTrackerException {
         assert errorMessage != null;
         if (!getArguments(input).isEmpty()) {
+            throw new ManhwaTrackerException(errorMessage);
+        }
+    }
+
+    private static int parseIndex(String value, String errorMessage)
+            throws ManhwaTrackerException {
+        assert value != null;
+        assert errorMessage != null;
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException exception) {
             throw new ManhwaTrackerException(errorMessage);
         }
     }

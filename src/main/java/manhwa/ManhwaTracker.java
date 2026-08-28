@@ -33,6 +33,8 @@ public class ManhwaTracker {
     private final Storage storage;
     private ConversationState state = ConversationState.IDLE;
     private Manhwa pendingManhwa;
+    private Manhwa statusTargetManhwa;
+    private Status pendingStatus;
     private PreferenceProfile pendingProfile;
     private int nextAspectIndex;
     private boolean isExit;
@@ -87,8 +89,31 @@ public class ManhwaTracker {
     public void startAddFlow(Manhwa manhwa) {
         assert manhwa != null;
         pendingManhwa = manhwa;
+        statusTargetManhwa = null;
+        pendingStatus = null;
         nextAspectIndex = 0;
         state = ConversationState.AWAITING_STATUS;
+    }
+
+    /**
+     * Starts collecting missing ratings before applying a status change.
+     *
+     * @param manhwa stored entry whose status will change
+     * @param status target status
+     * @return prompt for the first unrated aspect
+     * @throws ManhwaTrackerException if an existing rating cannot be copied
+     */
+    public String startStatusFlow(Manhwa manhwa, Status status)
+            throws ManhwaTrackerException {
+        assert manhwa != null;
+        assert status != null;
+        statusTargetManhwa = manhwa;
+        pendingManhwa = copyRatings(manhwa);
+        pendingStatus = status;
+        nextAspectIndex = findNextUnratedAspectIndex(0);
+        assert nextAspectIndex < Aspect.values().length;
+        state = ConversationState.AWAITING_RATINGS;
+        return getRatingPrompt(Aspect.values()[nextAspectIndex]);
     }
 
     /**
@@ -190,9 +215,9 @@ public class ManhwaTracker {
         }
 
         pendingManhwa.setRating(aspect, rating);
-        nextAspectIndex++;
+        nextAspectIndex = findNextUnratedAspectIndex(nextAspectIndex + 1);
         if (nextAspectIndex == Aspect.values().length) {
-            return finishAdd();
+            return completeRatingsFlow();
         }
         return getRatingPrompt(Aspect.values()[nextAspectIndex]);
     }
@@ -233,6 +258,36 @@ public class ManhwaTracker {
         return "Importance of " + aspect.getDisplayName() + " (1-5):";
     }
 
+    private int findNextUnratedAspectIndex(int startIndex) {
+        assert pendingManhwa != null;
+        Aspect[] aspects = Aspect.values();
+        for (int index = startIndex; index < aspects.length; index++) {
+            if (pendingManhwa.getRating(aspects[index]) == null) {
+                return index;
+            }
+        }
+        return aspects.length;
+    }
+
+    private Manhwa copyRatings(Manhwa source) throws ManhwaTrackerException {
+        assert source != null;
+        Manhwa copy = new Manhwa(source.getTitle(), source.getStatus());
+        for (Aspect aspect : Aspect.values()) {
+            Integer rating = source.getRating(aspect);
+            if (rating != null) {
+                copy.setRating(aspect, rating);
+            }
+        }
+        return copy;
+    }
+
+    private String completeRatingsFlow() throws ManhwaTrackerException {
+        if (pendingStatus != null) {
+            return finishStatusChange();
+        }
+        return finishAdd();
+    }
+
     private String finishAdd() throws ManhwaTrackerException {
         assert pendingManhwa != null;
         Manhwa completedManhwa = pendingManhwa;
@@ -255,6 +310,24 @@ public class ManhwaTracker {
         return PREFERENCES_SAVED_MESSAGE;
     }
 
+    private String finishStatusChange() throws ManhwaTrackerException {
+        assert pendingManhwa != null;
+        assert statusTargetManhwa != null;
+        assert pendingStatus != null;
+        Manhwa targetManhwa = statusTargetManhwa;
+        Status targetStatus = pendingStatus;
+        for (Aspect aspect : Aspect.values()) {
+            Integer rating = pendingManhwa.getRating(aspect);
+            assert rating != null;
+            targetManhwa.setRating(aspect, rating);
+        }
+        targetManhwa.setStatus(targetStatus);
+        storage.saveData(manhwaList, profile);
+        resetConversation();
+        return "Moved \"" + targetManhwa.getTitle() + "\" to "
+                + targetStatus.getDisplayName() + ".";
+    }
+
     private String getAddConfirmation(Manhwa manhwa) {
         assert manhwa != null;
         String prefix = "Got it. I've added \"" + manhwa.getTitle() + "\" to your ";
@@ -271,6 +344,8 @@ public class ManhwaTracker {
     private void resetConversation() {
         state = ConversationState.IDLE;
         pendingManhwa = null;
+        statusTargetManhwa = null;
+        pendingStatus = null;
         pendingProfile = null;
         nextAspectIndex = 0;
     }
