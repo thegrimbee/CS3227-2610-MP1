@@ -8,7 +8,9 @@ import manhwa.commands.Command;
 import manhwa.commands.DeleteCommand;
 import manhwa.commands.FindCommand;
 import manhwa.commands.FilterCommand;
+import manhwa.commands.HelpCommand;
 import manhwa.commands.ListCommand;
+import manhwa.commands.NoteCommand;
 import manhwa.commands.OnboardCommand;
 import manhwa.commands.RateCommand;
 import manhwa.commands.RerankCommand;
@@ -55,6 +57,10 @@ public final class Parser {
             "Invalid chapter command. Expected format: "
                     + "chapter <index> <n> /of <m>. E.g. chapter 1 5 /of 10";
     private static final String TOTAL_CHAPTER_SEPARATOR = "/of";
+    private static final String INVALID_NOTE_MESSAGE =
+            "Invalid note command. Expected format: note <index> [<text>|clear].";
+    private static final String INVALID_HELP_MESSAGE =
+            "Invalid help command. Expected format: help.";
 
     private Parser() {
     }
@@ -78,7 +84,9 @@ public final class Parser {
         case DeleteCommand.COMMAND_WORD -> parseDeleteCommand(input);
         case FilterCommand.COMMAND_WORD -> parseFilterCommand(input);
         case FindCommand.COMMAND_WORD -> parseFindCommand(input);
+        case HelpCommand.COMMAND_WORD -> parseHelpCommand(input);
         case OnboardCommand.COMMAND_WORD -> parseOnboardCommand(input);
+        case NoteCommand.COMMAND_WORD -> parseNoteCommand(input);
         case RateCommand.COMMAND_WORD -> parseRateCommand(input);
         case RerankCommand.COMMAND_WORD -> parseRerankCommand(input);
         case SortCommand.COMMAND_WORD -> parseSortCommand(input);
@@ -112,6 +120,24 @@ public final class Parser {
     private static Command parseRerankCommand(String input) throws ManhwaTrackerException {
         validateNoArguments(input, INVALID_RERANK_MESSAGE);
         return new RerankCommand();
+    }
+
+    private static Command parseHelpCommand(String input) throws ManhwaTrackerException {
+        validateNoArguments(input, INVALID_HELP_MESSAGE);
+        return new HelpCommand();
+    }
+
+    private static Command parseNoteCommand(String input) throws ManhwaTrackerException {
+        String arguments = getArguments(input);
+        if (arguments.isEmpty()) {
+            throw new ManhwaTrackerException(INVALID_NOTE_MESSAGE);
+        }
+        String[] noteParts = arguments.split("\\s+", 2);
+        int index = parseIndex(noteParts[0], INVALID_NOTE_MESSAGE);
+        if (noteParts.length == 1) {
+            return new NoteCommand(index);
+        }
+        return new NoteCommand(index, noteParts[1]);
     }
 
     private static Command parseRateCommand(String input) throws ManhwaTrackerException {
