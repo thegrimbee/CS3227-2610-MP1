@@ -1,5 +1,6 @@
 package manhwa;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -8,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import manhwa.commands.ByeCommand;
+import manhwa.commands.ChapterCommand;
 import manhwa.commands.Command;
 import manhwa.commands.DeleteCommand;
 import manhwa.commands.FindCommand;
@@ -115,6 +117,32 @@ class ParserTest {
     @Test
     void parseCommand_filterFormat_returnsFilterCommand() throws ManhwaTrackerException {
         assertInstanceOf(FilterCommand.class, Parser.parseCommand("filter action"));
+    }
+
+    @Test
+    void parseCommand_chapterFormats_returnChapterCommands() throws ManhwaTrackerException {
+        assertAll(
+                () -> assertInstanceOf(
+                        ChapterCommand.class, Parser.parseCommand("chapter 2")),
+                () -> assertInstanceOf(
+                        ChapterCommand.class, Parser.parseCommand("chapter 2 143")),
+                () -> assertInstanceOf(
+                        ChapterCommand.class, Parser.parseCommand("chapter 2 143 /of 179")),
+                () -> assertInstanceOf(
+                        ChapterCommand.class, Parser.parseCommand("chapter 2 143/of179")));
+    }
+
+    @Test
+    void parseCommand_invalidChapterFormats_throwExpectedFormatMessage() {
+        String message = "Invalid chapter command. Expected format: "
+                + "chapter <index> <n> /of <m>. E.g. chapter 1 5 /of 10";
+        assertAll(
+                () -> assertInvalidCommand("chapter", message),
+                () -> assertInvalidCommand("chapter first", message),
+                () -> assertInvalidCommand("chapter 1 next", message),
+                () -> assertInvalidCommand("chapter 1 12 total 20", message),
+                () -> assertInvalidCommand("chapter 1 12 /of", message),
+                () -> assertInvalidCommand("chapter 1 12 /of 20 extra", message));
     }
 
     @Test

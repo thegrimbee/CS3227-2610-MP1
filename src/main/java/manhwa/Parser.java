@@ -3,6 +3,7 @@ package manhwa;
 import manhwa.commands.AddCommand;
 import manhwa.commands.ByeCommand;
 import manhwa.commands.CancelCommand;
+import manhwa.commands.ChapterCommand;
 import manhwa.commands.Command;
 import manhwa.commands.DeleteCommand;
 import manhwa.commands.FindCommand;
@@ -50,6 +51,10 @@ public final class Parser {
             "Invalid untag command. Expected format: untag <index> <tag>.";
     private static final String INVALID_FILTER_MESSAGE =
             "Invalid filter command. Expected format: filter <tag>.";
+    private static final String INVALID_CHAPTER_MESSAGE =
+            "Invalid chapter command. Expected format: "
+                    + "chapter <index> <n> /of <m>. E.g. chapter 1 5 /of 10";
+    private static final String TOTAL_CHAPTER_SEPARATOR = "/of";
 
     private Parser() {
     }
@@ -68,6 +73,7 @@ public final class Parser {
         case AddCommand.COMMAND_WORD -> parseAddCommand(input);
         case ByeCommand.COMMAND_WORD -> new ByeCommand();
         case CancelCommand.COMMAND_WORD -> parseCancelCommand(input);
+        case ChapterCommand.COMMAND_WORD -> parseChapterCommand(input);
         case ListCommand.COMMAND_WORD -> parseListCommand(input);
         case DeleteCommand.COMMAND_WORD -> parseDeleteCommand(input);
         case FilterCommand.COMMAND_WORD -> parseFilterCommand(input);
@@ -129,6 +135,48 @@ public final class Parser {
         }
         int index = parseIndex(arguments[0], INVALID_STATUS_MESSAGE);
         return new StatusCommand(index, Status.fromString(arguments[1]));
+    }
+
+    private static Command parseChapterCommand(String input) throws ManhwaTrackerException {
+        String arguments = getArguments(input);
+        String[] chapterParts = arguments.split(TOTAL_CHAPTER_SEPARATOR, -1);
+        if (arguments.isEmpty() || chapterParts.length > 2) {
+            throw new ManhwaTrackerException(INVALID_CHAPTER_MESSAGE);
+        }
+
+        String[] currentParts = chapterParts[0].trim().split("\\s+");
+        if (chapterParts.length == 1) {
+            return parseChapterWithoutTotal(currentParts);
+        }
+        return parseChapterWithTotal(currentParts, chapterParts[1]);
+    }
+
+    private static Command parseChapterWithoutTotal(String[] currentParts)
+            throws ManhwaTrackerException {
+        assert currentParts != null;
+        if (currentParts.length == 1) {
+            return new ChapterCommand(parseIndex(currentParts[0], INVALID_CHAPTER_MESSAGE));
+        }
+        if (currentParts.length == 2) {
+            int index = parseIndex(currentParts[0], INVALID_CHAPTER_MESSAGE);
+            int current = parseIndex(currentParts[1], INVALID_CHAPTER_MESSAGE);
+            return new ChapterCommand(index, current);
+        }
+        throw new ManhwaTrackerException(INVALID_CHAPTER_MESSAGE);
+    }
+
+    private static Command parseChapterWithTotal(String[] currentParts, String totalPart)
+            throws ManhwaTrackerException {
+        assert currentParts != null;
+        assert totalPart != null;
+        String[] totalParts = totalPart.trim().split("\\s+");
+        if (currentParts.length != 2 || totalParts.length != 1 || totalParts[0].isEmpty()) {
+            throw new ManhwaTrackerException(INVALID_CHAPTER_MESSAGE);
+        }
+        int index = parseIndex(currentParts[0], INVALID_CHAPTER_MESSAGE);
+        int current = parseIndex(currentParts[1], INVALID_CHAPTER_MESSAGE);
+        int total = parseIndex(totalParts[0], INVALID_CHAPTER_MESSAGE);
+        return new ChapterCommand(index, current, total);
     }
 
     private static Command parseSortCommand(String input) throws ManhwaTrackerException {
