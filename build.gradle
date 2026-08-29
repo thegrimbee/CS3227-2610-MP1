@@ -24,7 +24,7 @@ java {
 }
 
 application {
-    mainClass = 'manhwa.CliMain'
+    mainClass = 'manhwa.Launcher'
 }
 
 tasks.named('run', JavaExec) {
