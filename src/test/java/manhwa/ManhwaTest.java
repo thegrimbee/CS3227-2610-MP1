@@ -30,7 +30,7 @@ class ManhwaTest {
                 () -> assertEquals(0, manhwa.getTotalChapter()),
                 () -> assertEquals(List.of(), manhwa.getTags()),
                 () -> assertNull(manhwa.getNote()),
-                () -> assertEquals("—", manhwa.getChapterDisplay()));
+                () -> assertEquals("-/-", manhwa.getChapterDisplay()));
     }
 
     @Test

@@ -11,7 +11,7 @@ final class DisplayUtil {
     private static final String FIELD_SEPARATOR = "  ";
     private static final String TAG_PREFIX = "#";
     private static final String SCORE_PREFIX = "Score: ";
-    private static final String UNAVAILABLE_DISPLAY = "—";
+    private static final String UNAVAILABLE_DISPLAY = "-";
 
     private DisplayUtil() {
     }

@@ -19,7 +19,7 @@ public class Manhwa {
     private static final String RATING_SEPARATOR = ";";
     private static final String KEY_VALUE_SEPARATOR = "=";
     private static final String CHAPTER_SEPARATOR = "/";
-    private static final String NO_CHAPTER_DISPLAY = "—";
+    private static final String NO_CHAPTER_DISPLAY = "-/-";
     private static final String CHAPTER_PREFIX = "ch. ";
     private static final String TAG_ERROR_MESSAGE = "Tag must be a single word.";
     private static final String NOTE_ERROR_MESSAGE = "Note cannot contain '|'.";

@@ -51,7 +51,7 @@ public class RateCommand extends Command {
         Manhwa manhwa = list.get(index);
         manhwa.setRating(aspect, rating);
         storage.saveData(list, profile);
-        return "Updated: " + manhwa.getTitle() + " \u2014 "
+        return "Updated: " + manhwa.getTitle() + " - "
                 + aspect.getDisplayName() + ": " + rating + "/10";
     }
 }

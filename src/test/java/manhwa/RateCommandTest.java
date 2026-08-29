@@ -24,8 +24,8 @@ class RateCommandTest {
         Manhwa restored = storage.loadData().getManhwaList().get(1);
 
         assertAll(
-                () -> assertEquals("Updated: Solo Leveling \u2014 plot: 8/10", initialResponse),
-                () -> assertEquals("Updated: Solo Leveling \u2014 plot: 10/10", updateResponse),
+                () -> assertEquals("Updated: Solo Leveling - plot: 8/10", initialResponse),
+                () -> assertEquals("Updated: Solo Leveling - plot: 10/10", updateResponse),
                 () -> assertEquals(Integer.valueOf(10), manhwa.getRating(Aspect.PLOT)),
                 () -> assertEquals(Integer.valueOf(10), restored.getRating(Aspect.PLOT)));
     }

@@ -34,7 +34,7 @@ class DeleteCommandTest {
                 () -> assertEquals(
                         "Noted. I've removed this entry:" + System.lineSeparator()
                                 + "  [ONGOING] Solo Leveling  #action #fantasy  ch. 143/179  "
-                                + "Score: —" + System.lineSeparator()
+                                + "Score: -" + System.lineSeparator()
                                 + "You now have 1 entries.",
                         response),
                 () -> assertEquals(1, list.size()),

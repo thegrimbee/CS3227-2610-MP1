@@ -30,9 +30,9 @@ class FindCommandTest {
 
         assertEquals(
                 "Here are the matching entries in your list:" + System.lineSeparator()
-                        + "1. [ONGOING] Solo Leveling  #action  —  Score: —"
+                        + "1. [ONGOING] Solo Leveling  #action  -/-  Score: -"
                         + System.lineSeparator()
-                        + "2. [COMPLETED] The Max-Level Player  —  Score: —",
+                        + "2. [COMPLETED] The Max-Level Player  -/-  Score: -",
                 response);
     }
 

@@ -65,7 +65,7 @@ class OnboardFlowTest {
         Storage storage = new Storage(tempDirectory.toString());
         ManhwaTracker tracker = new ManhwaTracker(list, null, storage);
 
-        assertTrue(tracker.getResponse("list").endsWith("Score: \u2014"));
+        assertTrue(tracker.getResponse("list").endsWith("Score: -"));
         assertEquals(FIRST_PROMPT, tracker.getResponse("onboard"));
         assertEquals("Importance of art (1-5):", tracker.getResponse("5"));
         assertEquals("Importance of uniqueness (1-5):", tracker.getResponse("4"));
