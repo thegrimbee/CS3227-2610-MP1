@@ -1,0 +1,28 @@
+Welcome to ManhwaDex Lite! Type `help` to see available commands.
+Let's set up your scoring preferences! Rate how important each aspect is from 1 to 5.
+Importance of plot (1-5):
+Importance of art (1-5):
+Importance of uniqueness (1-5):
+Importance of characters (1-5):
+Importance of pacing (1-5):
+Preferences saved! Overall scores will now use your priorities. You can change your scoring mechanism by rerunning the onboard command.
+Is "Solo Leveling" wishlist, ongoing, or completed?
+Rate plot (1-10) for "Solo Leveling":
+Rate art (1-10) for "Solo Leveling":
+Rate uniqueness (1-10) for "Solo Leveling":
+Rate characters (1-10) for "Solo Leveling":
+Rate pacing (1-10) for "Solo Leveling":
+Got it. I've added "Solo Leveling" to your ongoing list (Score: 8.7).
+Here are the entries in your list:
+1. [ONGOING] Solo Leveling  -/-  Score: 8.7
+Here are the entries in your list:
+1. [ONGOING] Solo Leveling  -/-  Score: 8.7
+Total entries: 1
+Wishlist: 0 | Ongoing: 1 | Completed: 0
+Average overall score (rated): 8.7
+Average ratings: plot 9.0 | art 10.0 | uniqueness 8.0 | characters 7.0 | pacing 8.0
+Total chapters read: 0
+Top 3 by score: 1. Solo Leveling (8.7)
+Top 3 tags:
+Top priority aspects: plot (5) | art (4) | uniqueness (3)
+Bye. See you next time!
