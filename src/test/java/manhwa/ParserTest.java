@@ -11,7 +11,10 @@ import manhwa.commands.ByeCommand;
 import manhwa.commands.Command;
 import manhwa.commands.DeleteCommand;
 import manhwa.commands.FindCommand;
+import manhwa.commands.FilterCommand;
 import manhwa.commands.ListCommand;
+import manhwa.commands.TagCommand;
+import manhwa.commands.UntagCommand;
 
 class ParserTest {
     @Test
@@ -81,6 +84,44 @@ class ParserTest {
     @Test
     void parseCommand_missingFindKeyword_throwsExpectedFormatMessage() {
         assertInvalidCommand("find", "Invalid find command. Expected format: find <keyword>.");
+    }
+
+    @Test
+    void parseCommand_tagFormat_returnsTagCommand() throws ManhwaTrackerException {
+        assertInstanceOf(TagCommand.class, Parser.parseCommand("tag 2 action"));
+    }
+
+    @Test
+    void parseCommand_invalidTagFormats_throwExpectedFormatMessage() {
+        String message = "Invalid tag command. Expected format: tag <index> <tag>.";
+        assertInvalidCommand("tag", message);
+        assertInvalidCommand("tag first action", message);
+        assertInvalidCommand("tag 1 dark fantasy", message);
+    }
+
+    @Test
+    void parseCommand_untagFormat_returnsUntagCommand() throws ManhwaTrackerException {
+        assertInstanceOf(UntagCommand.class, Parser.parseCommand("untag 2 action"));
+    }
+
+    @Test
+    void parseCommand_invalidUntagFormats_throwExpectedFormatMessage() {
+        String message = "Invalid untag command. Expected format: untag <index> <tag>.";
+        assertInvalidCommand("untag", message);
+        assertInvalidCommand("untag first action", message);
+        assertInvalidCommand("untag 1 dark fantasy", message);
+    }
+
+    @Test
+    void parseCommand_filterFormat_returnsFilterCommand() throws ManhwaTrackerException {
+        assertInstanceOf(FilterCommand.class, Parser.parseCommand("filter action"));
+    }
+
+    @Test
+    void parseCommand_invalidFilterFormats_throwExpectedFormatMessage() {
+        String message = "Invalid filter command. Expected format: filter <tag>.";
+        assertInvalidCommand("filter", message);
+        assertInvalidCommand("filter dark fantasy", message);
     }
 
     private static void assertInvalidCommand(String input, String expectedMessage) {

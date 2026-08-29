@@ -6,12 +6,15 @@ import manhwa.commands.CancelCommand;
 import manhwa.commands.Command;
 import manhwa.commands.DeleteCommand;
 import manhwa.commands.FindCommand;
+import manhwa.commands.FilterCommand;
 import manhwa.commands.ListCommand;
 import manhwa.commands.OnboardCommand;
 import manhwa.commands.RateCommand;
 import manhwa.commands.RerankCommand;
 import manhwa.commands.SortCommand;
 import manhwa.commands.StatusCommand;
+import manhwa.commands.TagCommand;
+import manhwa.commands.UntagCommand;
 
 /**
  * Parses user input into validated command objects.
@@ -41,6 +44,12 @@ public final class Parser {
             "Rating must be an integer from 1 to 10.";
     private static final String INVALID_SORT_MESSAGE =
             "Invalid sort command. Expected format: sort <key>.";
+    private static final String INVALID_TAG_MESSAGE =
+            "Invalid tag command. Expected format: tag <index> <tag>.";
+    private static final String INVALID_UNTAG_MESSAGE =
+            "Invalid untag command. Expected format: untag <index> <tag>.";
+    private static final String INVALID_FILTER_MESSAGE =
+            "Invalid filter command. Expected format: filter <tag>.";
 
     private Parser() {
     }
@@ -61,12 +70,15 @@ public final class Parser {
         case CancelCommand.COMMAND_WORD -> parseCancelCommand(input);
         case ListCommand.COMMAND_WORD -> parseListCommand(input);
         case DeleteCommand.COMMAND_WORD -> parseDeleteCommand(input);
+        case FilterCommand.COMMAND_WORD -> parseFilterCommand(input);
         case FindCommand.COMMAND_WORD -> parseFindCommand(input);
         case OnboardCommand.COMMAND_WORD -> parseOnboardCommand(input);
         case RateCommand.COMMAND_WORD -> parseRateCommand(input);
         case RerankCommand.COMMAND_WORD -> parseRerankCommand(input);
         case SortCommand.COMMAND_WORD -> parseSortCommand(input);
         case StatusCommand.COMMAND_WORD -> parseStatusCommand(input);
+        case TagCommand.COMMAND_WORD -> parseTagCommand(input);
+        case UntagCommand.COMMAND_WORD -> parseUntagCommand(input);
         default -> throw new ManhwaTrackerException(UNKNOWN_COMMAND_MESSAGE);
         };
     }
@@ -125,6 +137,32 @@ public final class Parser {
             throw new ManhwaTrackerException(INVALID_SORT_MESSAGE);
         }
         return new SortCommand(SortKey.fromString(arguments));
+    }
+
+    private static Command parseTagCommand(String input) throws ManhwaTrackerException {
+        String[] arguments = getArguments(input).split("\\s+");
+        if (arguments.length != 2) {
+            throw new ManhwaTrackerException(INVALID_TAG_MESSAGE);
+        }
+        int index = parseIndex(arguments[0], INVALID_TAG_MESSAGE);
+        return new TagCommand(index, arguments[1]);
+    }
+
+    private static Command parseUntagCommand(String input) throws ManhwaTrackerException {
+        String[] arguments = getArguments(input).split("\\s+");
+        if (arguments.length != 2) {
+            throw new ManhwaTrackerException(INVALID_UNTAG_MESSAGE);
+        }
+        int index = parseIndex(arguments[0], INVALID_UNTAG_MESSAGE);
+        return new UntagCommand(index, arguments[1]);
+    }
+
+    private static Command parseFilterCommand(String input) throws ManhwaTrackerException {
+        String arguments = getArguments(input);
+        if (arguments.isEmpty() || arguments.split("\\s+").length != 1) {
+            throw new ManhwaTrackerException(INVALID_FILTER_MESSAGE);
+        }
+        return new FilterCommand(arguments);
     }
 
     private static Command parseListCommand(String input) throws ManhwaTrackerException {
