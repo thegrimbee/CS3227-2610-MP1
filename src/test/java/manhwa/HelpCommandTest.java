@@ -25,6 +25,7 @@ import manhwa.commands.OnboardCommand;
 import manhwa.commands.RateCommand;
 import manhwa.commands.RerankCommand;
 import manhwa.commands.SortCommand;
+import manhwa.commands.StatsCommand;
 import manhwa.commands.StatusCommand;
 import manhwa.commands.TagCommand;
 import manhwa.commands.UntagCommand;
@@ -54,6 +55,7 @@ class HelpCommandTest {
                 TagCommand.COMMAND_WORD + " <index> <tag>",
                 UntagCommand.COMMAND_WORD + " <index> <tag>",
                 NoteCommand.COMMAND_WORD + " <index> [<text>|clear]",
+                StatsCommand.COMMAND_WORD,
                 RerankCommand.COMMAND_WORD,
                 HelpCommand.COMMAND_WORD,
                 ByeCommand.COMMAND_WORD,

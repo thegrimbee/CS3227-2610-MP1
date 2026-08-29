@@ -48,6 +48,7 @@ public class HelpCommand extends Command {
                 TagCommand.COMMAND_WORD + " <index> <tag>",
                 UntagCommand.COMMAND_WORD + " <index> <tag>",
                 NoteCommand.COMMAND_WORD + " <index> [<text>|" + NoteCommand.CLEAR_WORD + "]",
+                StatsCommand.COMMAND_WORD,
                 RerankCommand.COMMAND_WORD,
                 COMMAND_WORD,
                 ByeCommand.COMMAND_WORD,

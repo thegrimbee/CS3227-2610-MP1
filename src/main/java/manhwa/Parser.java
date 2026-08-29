@@ -15,6 +15,7 @@ import manhwa.commands.OnboardCommand;
 import manhwa.commands.RateCommand;
 import manhwa.commands.RerankCommand;
 import manhwa.commands.SortCommand;
+import manhwa.commands.StatsCommand;
 import manhwa.commands.StatusCommand;
 import manhwa.commands.TagCommand;
 import manhwa.commands.UntagCommand;
@@ -61,6 +62,8 @@ public final class Parser {
             "Invalid note command. Expected format: note <index> [<text>|clear].";
     private static final String INVALID_HELP_MESSAGE =
             "Invalid help command. Expected format: help.";
+    private static final String INVALID_STATS_MESSAGE =
+            "Invalid stats command. Expected format: stats.";
 
     private Parser() {
     }
@@ -90,6 +93,7 @@ public final class Parser {
         case RateCommand.COMMAND_WORD -> parseRateCommand(input);
         case RerankCommand.COMMAND_WORD -> parseRerankCommand(input);
         case SortCommand.COMMAND_WORD -> parseSortCommand(input);
+        case StatsCommand.COMMAND_WORD -> parseStatsCommand(input);
         case StatusCommand.COMMAND_WORD -> parseStatusCommand(input);
         case TagCommand.COMMAND_WORD -> parseTagCommand(input);
         case UntagCommand.COMMAND_WORD -> parseUntagCommand(input);
@@ -125,6 +129,11 @@ public final class Parser {
     private static Command parseHelpCommand(String input) throws ManhwaTrackerException {
         validateNoArguments(input, INVALID_HELP_MESSAGE);
         return new HelpCommand();
+    }
+
+    private static Command parseStatsCommand(String input) throws ManhwaTrackerException {
+        validateNoArguments(input, INVALID_STATS_MESSAGE);
+        return new StatsCommand();
     }
 
     private static Command parseNoteCommand(String input) throws ManhwaTrackerException {
