@@ -20,7 +20,7 @@ if ! ../gradlew -p .. clean build; then
     exit 1
 fi
 
-if ! java -jar ../build/libs/manhwadexlite.jar < input.txt > "$ACTUAL_FILE"; then
+if ! java -jar ../build/libs/manhwadexlite.jar --cli < input.txt > "$ACTUAL_FILE"; then
     echo "FAIL: CLI execution failed."
     exit 1
 fi

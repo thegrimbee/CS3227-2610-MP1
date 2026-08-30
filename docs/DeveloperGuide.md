@@ -206,9 +206,13 @@ values tie because Java's list sort is stable.
 `Storage` uses Java NIO and UTF-8. The path supplied by both launchers is the relative directory
 `data`, and the file name is `manhwalist.txt`. Startup creates both if necessary.
 
-Every successful mutation performs a synchronous full rewrite with
-`StandardOpenOption.TRUNCATE_EXISTING`. Read-only commands do not save. Mutations that finish an
-interactive flow are saved by `ManhwaTracker`; direct mutations are saved by their command.
+Every successful mutation serializes the full dataset to a sibling temporary file, flushes it,
+keeps the previous non-empty data as `manhwalist.txt.bak`, and replaces the live file with an
+atomic move where the file system supports it. A separate `manhwalist.txt.lock` coordinates
+application processes. Each `Storage` instance remembers the bytes it loaded and rejects a save
+when another process has changed the file, preventing a stale instance from overwriting newer
+data. Read-only commands do not save. Mutations that finish an interactive flow are saved by
+`ManhwaTracker`; direct mutations are saved by their command.
 
 ### 4.1 Actual file format
 
@@ -232,7 +236,8 @@ MANHWA | Solo Leveling | ONGOING | action,fantasy | plot=9;art=10;uniqueness=8;c
 
 Empty tags, ratings, and notes are represented by empty fields. No chapter progress is `0/0`.
 Status is serialized with the uppercase enum name. Ratings are serialized in the fixed aspect
-order.
+order. Because commas delimit tags, user-entered tags cannot contain commas, pipes, or
+whitespace.
 
 `dateAdded` is not included in the actual storage record. Deserialization constructs a new
 `Manhwa`, so loaded entries receive `LocalDate.now()`.
@@ -249,14 +254,18 @@ Warning: skipping corrupt line: <original line>
 
 The remaining valid data is returned. A missing PREF record yields a null profile and triggers
 startup onboarding. A file-level I/O failure prevents startup and is displayed in the CLI or an
-error dialog in the GUI. Save failures are wrapped in `UncheckedIOException`.
+error dialog in the GUI. Storage wraps save failures and stale-writer conflicts in
+`UncheckedIOException`; `ManhwaTracker` catches that exception, reloads the latest durable
+snapshot, resets any interactive flow, and returns a user-facing error. If reload itself fails,
+the response tells the user to restart before making more changes.
 
 ## 5. Error-handling strategy
 
 Expected input and domain errors use `ManhwaTrackerException`. The parser creates format errors;
 enum and model types create value errors; and `ManhwaList` creates index and duplicate errors.
-The controller catches this one checked type and returns its exact message, keeping both UIs
-free of command-specific exception handling.
+The controller catches this checked type and returns its exact message. It also handles storage
+save failures centrally by restoring the durable snapshot, keeping both UIs free of
+command-specific exception handling.
 
 Non-null collaboration invariants are expressed with Java `assert`. Gradle enables assertions
 during tests. Assertions are not a substitute for user-input validation and are normally
@@ -267,7 +276,7 @@ disabled in packaged production execution unless Java is started with `-ea`.
 ### 6.1 Automated tests
 
 The JUnit 5 suite is under `src/test/java/manhwa`. At the time this guide was written, the clean
-build ran 112 tests successfully. Coverage is organized by responsibility:
+build ran 122 tests successfully. Coverage is organized by responsibility:
 
 - parser and enum validation: `ParserTest`, `AspectTest`, `StatusTest`;
 - domain calculations and collection behavior: `ManhwaTest`, `PreferenceProfileTest`,
@@ -389,7 +398,6 @@ serialization, model parsing, `StorageTest`, sample records, and both guides.
 - The GUI has manual smoke coverage only and performs storage operations on the Swing event
   dispatch thread. This is acceptable for the intended small local file but would not scale to
   slow or remote storage.
-- Saves rewrite the target file directly rather than using a temporary file and atomic rename.
 
 ## 10. Acknowledgements
 

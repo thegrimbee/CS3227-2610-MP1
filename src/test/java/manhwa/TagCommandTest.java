@@ -48,7 +48,26 @@ class TagCommandTest {
                 () -> new TagCommand(1, "dark fantasy")
                         .execute(list, null, storage, tracker));
 
-        assertEquals("Tag must be a single word.", exception.getMessage());
+        assertEquals(
+                "Tag must be a single word without ',' or '|'.", exception.getMessage());
+    }
+
+    @Test
+    void tag_commaDelimiter_isRejectedWithoutChangingStoredEntry() throws Exception {
+        Manhwa manhwa = new Manhwa("Tower of God", Status.ONGOING);
+        ManhwaList list = listWith(manhwa);
+        Storage storage = new Storage(tempDirectory.toString());
+        storage.saveData(list, null);
+        ManhwaTracker tracker = new ManhwaTracker(list, null, storage);
+
+        String response = tracker.getResponse("tag 1 action,fantasy");
+        Manhwa restored = storage.loadData().getManhwaList().get(1);
+
+        assertAll(
+                () -> assertEquals(
+                        "Tag must be a single word without ',' or '|'.", response),
+                () -> assertTrue(manhwa.getTags().isEmpty()),
+                () -> assertTrue(restored.getTags().isEmpty()));
     }
 
     @Test

@@ -8,7 +8,7 @@ if exist "ACTUAL.TXT" del /q "ACTUAL.TXT"
 call ..\gradlew.bat -p .. clean build
 if errorlevel 1 goto build_failed
 
-java -jar ..\build\libs\manhwadexlite.jar < input.txt > ACTUAL.TXT
+java -jar ..\build\libs\manhwadexlite.jar --cli < input.txt > ACTUAL.TXT
 if errorlevel 1 goto run_failed
 
 fc /N EXPECTED.TXT ACTUAL.TXT

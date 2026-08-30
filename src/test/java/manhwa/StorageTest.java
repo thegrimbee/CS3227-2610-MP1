@@ -4,11 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -112,6 +114,84 @@ class StorageTest {
                 () -> assertNull(result.getPreferenceProfile()));
     }
 
+    @Test
+    void saveData_replacementFailure_preservesOriginalFileAndBackup() throws Exception {
+        Storage initialStorage = new Storage(tempDirectory.toString());
+        ManhwaList originalList = new ManhwaList();
+        originalList.add(new Manhwa("Original", Status.WISHLIST));
+        initialStorage.saveData(originalList, null);
+
+        Storage failingStorage = new FailingReplacementStorage(tempDirectory.toString());
+        LoadResult loaded = failingStorage.loadData();
+        loaded.getManhwaList().add(new Manhwa("Unsaved", Status.ONGOING));
+
+        assertThrows(
+                UncheckedIOException.class,
+                () -> failingStorage.saveData(
+                        loaded.getManhwaList(), loaded.getPreferenceProfile()));
+
+        LoadResult restored = new Storage(tempDirectory.toString()).loadData();
+        assertAll(
+                () -> assertEquals(1, restored.getManhwaList().size()),
+                () -> assertEquals("Original", restored.getManhwaList().get(1).getTitle()),
+                () -> assertTrue(Files.isRegularFile(
+                        tempDirectory.resolve(FILE_NAME + ".bak"))),
+                () -> assertEquals(
+                        Files.readString(tempDirectory.resolve(FILE_NAME)),
+                        Files.readString(tempDirectory.resolve(FILE_NAME + ".bak"))));
+    }
+
+    @Test
+    void saveData_staleWriterCannotOverwriteNewerData() throws Exception {
+        Storage initialStorage = new Storage(tempDirectory.toString());
+        ManhwaList initialList = new ManhwaList();
+        initialList.add(new Manhwa("Original", Status.WISHLIST));
+        initialStorage.saveData(initialList, null);
+
+        Storage firstStorage = new Storage(tempDirectory.toString());
+        Storage staleStorage = new Storage(tempDirectory.toString());
+        LoadResult firstLoaded = firstStorage.loadData();
+        LoadResult staleLoaded = staleStorage.loadData();
+        firstLoaded.getManhwaList().add(new Manhwa("First writer", Status.ONGOING));
+        firstStorage.saveData(firstLoaded.getManhwaList(), null);
+        staleLoaded.getManhwaList().add(new Manhwa("Stale writer", Status.COMPLETED));
+
+        assertThrows(
+                UncheckedIOException.class,
+                () -> staleStorage.saveData(staleLoaded.getManhwaList(), null));
+
+        LoadResult restored = new Storage(tempDirectory.toString()).loadData();
+        assertAll(
+                () -> assertEquals(2, restored.getManhwaList().size()),
+                () -> assertEquals("Original", restored.getManhwaList().get(1).getTitle()),
+                () -> assertEquals("First writer", restored.getManhwaList().get(2).getTitle()));
+    }
+
+    @Test
+    void saveFailure_trackerReloadsDurableStateAndReturnsError() throws Exception {
+        Storage initialStorage = new Storage(tempDirectory.toString());
+        ManhwaList initialList = new ManhwaList();
+        initialList.add(new Manhwa("Protected", Status.WISHLIST));
+        initialStorage.saveData(initialList, null);
+
+        Storage failingStorage = new FailingReplacementStorage(tempDirectory.toString());
+        LoadResult loaded = failingStorage.loadData();
+        ManhwaList activeList = loaded.getManhwaList();
+        ManhwaTracker tracker = new ManhwaTracker(
+                activeList, loaded.getPreferenceProfile(), failingStorage);
+
+        String response = tracker.getResponse("delete 1");
+
+        assertAll(
+                () -> assertEquals(
+                        "Unable to save ManhwaDex Lite data. No changes were kept; "
+                                + "the latest saved data was reloaded.",
+                        response),
+                () -> assertEquals(1, activeList.size()),
+                () -> assertEquals("Protected", activeList.get(1).getTitle()),
+                () -> assertEquals(ConversationState.IDLE, tracker.getState()));
+    }
+
     private static PreferenceProfile createProfile() throws ManhwaTrackerException {
         PreferenceProfile profile = new PreferenceProfile();
         profile.setWeight(Aspect.PLOT, 5);
@@ -135,6 +215,17 @@ class StorageTest {
             PreferenceProfile expected, PreferenceProfile actual) {
         for (Aspect aspect : Aspect.values()) {
             assertEquals(expected.getWeight(aspect), actual.getWeight(aspect));
+        }
+    }
+
+    private static final class FailingReplacementStorage extends Storage {
+        private FailingReplacementStorage(String directoryPath) {
+            super(directoryPath);
+        }
+
+        @Override
+        void replaceDataFile(Path temporaryFile) throws IOException {
+            throw new IOException("Simulated replacement failure.");
         }
     }
 }

@@ -1,5 +1,7 @@
 package manhwa;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Locale;
 
 import manhwa.commands.Command;
@@ -23,6 +25,12 @@ public class ManhwaTracker {
     private static final String PREFERENCES_SAVED_MESSAGE =
             "Preferences saved! Overall scores will now use your priorities. "
                     + "You can change your scoring mechanism by rerunning the onboard command.";
+    private static final String SAVE_FAILED_MESSAGE =
+            "Unable to save ManhwaDex Lite data. No changes were kept; "
+                    + "the latest saved data was reloaded.";
+    private static final String SAVE_RECOVERY_FAILED_MESSAGE =
+            "Unable to save ManhwaDex Lite data, and the saved data could not be reloaded. "
+                    + "Restart the application before making more changes.";
     private static final int MIN_RATING = 1;
     private static final int MAX_RATING = 10;
     private static final int MIN_IMPORTANCE = 1;
@@ -78,6 +86,8 @@ public class ManhwaTracker {
             return response;
         } catch (ManhwaTrackerException exception) {
             return exception.getMessage();
+        } catch (UncheckedIOException exception) {
+            return recoverFromSaveFailure();
         }
     }
 
@@ -339,6 +349,18 @@ public class ManhwaTracker {
                 Locale.ROOT, "%.1f", manhwa.getOverallScore(scoreProfile));
         return prefix + manhwa.getStatus().getDisplayName()
                 + " list (Score: " + score + ").";
+    }
+
+    private String recoverFromSaveFailure() {
+        resetConversation();
+        try {
+            LoadResult loadResult = storage.loadData();
+            manhwaList.replaceWith(loadResult.getManhwaList());
+            profile = loadResult.getPreferenceProfile();
+            return SAVE_FAILED_MESSAGE;
+        } catch (IOException exception) {
+            return SAVE_RECOVERY_FAILED_MESSAGE;
+        }
     }
 
     private void resetConversation() {

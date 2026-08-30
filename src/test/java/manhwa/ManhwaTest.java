@@ -91,6 +91,7 @@ class ManhwaTest {
         assertAll(
                 () -> assertTagError(manhwa, ""),
                 () -> assertTagError(manhwa, "dark fantasy"),
+                () -> assertTagError(manhwa, "action,fantasy"),
                 () -> assertTagError(manhwa, "action|fantasy"));
     }
 
@@ -179,6 +180,7 @@ class ManhwaTest {
     private static void assertTagError(Manhwa manhwa, String tag) {
         ManhwaTrackerException exception = assertThrows(
                 ManhwaTrackerException.class, () -> manhwa.addTag(tag));
-        assertEquals("Tag must be a single word.", exception.getMessage());
+        assertEquals(
+                "Tag must be a single word without ',' or '|'.", exception.getMessage());
     }
 }

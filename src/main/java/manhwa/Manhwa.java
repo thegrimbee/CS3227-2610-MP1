@@ -21,7 +21,8 @@ public class Manhwa {
     private static final String CHAPTER_SEPARATOR = "/";
     private static final String NO_CHAPTER_DISPLAY = "-/-";
     private static final String CHAPTER_PREFIX = "ch. ";
-    private static final String TAG_ERROR_MESSAGE = "Tag must be a single word.";
+    private static final String TAG_ERROR_MESSAGE =
+            "Tag must be a single word without ',' or '|'.";
     private static final String NOTE_ERROR_MESSAGE = "Note cannot contain '|'.";
     private static final String RATING_ERROR_MESSAGE =
             "Rating must be an integer from 1 to 10.";
@@ -103,7 +104,7 @@ public class Manhwa {
      * Adds a tag if it is not already present.
      *
      * @param tag single-word tag to add
-     * @throws ManhwaTrackerException if the tag is empty, contains whitespace, or contains a pipe
+     * @throws ManhwaTrackerException if the tag is empty or contains whitespace or a delimiter
      */
     public void addTag(String tag) throws ManhwaTrackerException {
         assert tag != null;
@@ -308,7 +309,7 @@ public class Manhwa {
     }
 
     private boolean isValidTag(String tag) {
-        if (tag.isBlank() || tag.contains("|")) {
+        if (tag.isBlank() || tag.contains(TAG_SEPARATOR) || tag.contains("|")) {
             return false;
         }
         return tag.chars().noneMatch(Character::isWhitespace);

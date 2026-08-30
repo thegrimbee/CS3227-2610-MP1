@@ -72,6 +72,17 @@ public class ManhwaList {
     }
 
     /**
+     * Replaces this list's contents with a loaded durable snapshot.
+     *
+     * @param source snapshot whose entries should become current
+     */
+    void replaceWith(ManhwaList source) {
+        assert source != null;
+        entries.clear();
+        entries.addAll(source.entries);
+    }
+
+    /**
      * Finds entries whose titles contain a keyword without regard to letter case.
      *
      * @param keyword title keyword

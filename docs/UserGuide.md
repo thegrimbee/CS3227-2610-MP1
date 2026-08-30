@@ -358,7 +358,8 @@ The application does not currently provide a command to reset recorded progress 
 
 ### `tag` and `untag`
 
-Adds or removes an exact, case-sensitive single-word tag.
+Adds or removes an exact, case-sensitive single-word tag. Tags cannot contain whitespace,
+commas, or pipes because commas and pipes delimit fields in the saved format.
 
 ```text
 tag <index> <tag>
@@ -447,9 +448,13 @@ data/manhwalist.txt
 ```
 
 The `data` directory and file are created automatically in the launch working directory.
-Mutating commands rewrite the full file before returning. To back up the reading list, close
-the application and copy `manhwalist.txt`. Avoid editing it manually; malformed lines are
-skipped on the next load and a warning is written to standard error.
+Mutating commands write and flush a temporary file before replacing the live file. Once data
+already exists, the previous version is retained as `manhwalist.txt.bak`. A lock file prevents
+simultaneous writes, and an application instance whose loaded data is stale refuses to
+overwrite a newer file; it reloads the latest saved data and reports that its attempted change
+was not kept. To make an independent backup, close the application and copy `manhwalist.txt`.
+Avoid editing it while the application is open; malformed lines are skipped on the next load
+and a warning is written to standard error.
 
 Deleting `manhwalist.txt` while the application is closed resets the list and causes onboarding
 to start at the next launch.
