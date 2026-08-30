@@ -10,6 +10,11 @@ public interface Ui {
     void showWelcome();
 
     /**
+     * Shows the welcome message for a first-time user entering onboarding.
+     */
+    void showOnboardingWelcome();
+
+    /**
      * Shows a message to the user.
      *
      * @param message message to show

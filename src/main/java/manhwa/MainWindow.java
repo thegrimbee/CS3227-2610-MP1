@@ -19,6 +19,9 @@ public final class MainWindow extends JFrame {
     private static final String WINDOW_TITLE = "ManhwaDex Lite";
     private static final String WELCOME_MESSAGE =
             "Welcome to ManhwaDex Lite! Type `help` to see available commands.";
+    private static final String ONBOARDING_WELCOME_MESSAGE =
+            "Welcome to ManhwaDex Lite! Follow the onboarding process to register "
+                    + "your preferences!";
     private static final String USER_INPUT_PREFIX = "> ";
     private static final String FONT_NAME = Font.SANS_SERIF;
     private static final int FONT_SIZE = 14;
@@ -81,10 +84,12 @@ public final class MainWindow extends JFrame {
     }
 
     private void showStartupMessages() {
-        appendMessage(WELCOME_MESSAGE);
         String startupPrompt = controller.startOnboardingIfNeeded();
         if (startupPrompt != null) {
+            appendMessage(ONBOARDING_WELCOME_MESSAGE);
             appendMessage(startupPrompt);
+        } else {
+            appendMessage(WELCOME_MESSAGE);
         }
     }
 

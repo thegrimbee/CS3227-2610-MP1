@@ -14,6 +14,9 @@ import org.junit.jupiter.api.Test;
 class CliUiTest {
     private static final String WELCOME_MESSAGE =
             "Welcome to ManhwaDex Lite! Type `help` to see available commands.";
+    private static final String ONBOARDING_WELCOME_MESSAGE =
+            "Welcome to ManhwaDex Lite! Follow the onboarding process to register "
+                    + "your preferences!";
 
     @Test
     void showWelcome_printsWelcomeText() {
@@ -23,6 +26,17 @@ class CliUiTest {
         ui.showWelcome();
 
         assertEquals(WELCOME_MESSAGE + System.lineSeparator(), output.toString(
+                StandardCharsets.UTF_8));
+    }
+
+    @Test
+    void showOnboardingWelcome_printsFirstTimeWelcomeText() {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        CliUi ui = createUi("", output);
+
+        ui.showOnboardingWelcome();
+
+        assertEquals(ONBOARDING_WELCOME_MESSAGE + System.lineSeparator(), output.toString(
                 StandardCharsets.UTF_8));
     }
 

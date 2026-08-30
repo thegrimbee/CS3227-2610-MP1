@@ -1,4 +1,4 @@
-Welcome to ManhwaDex Lite! Type `help` to see available commands.
+Welcome to ManhwaDex Lite! Follow the onboarding process to register your preferences!
 Let's set up your scoring preferences! Rate how important each aspect is from 1 to 5.
 Importance of plot (1-5):
 Importance of art (1-5):

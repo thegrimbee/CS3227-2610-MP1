@@ -13,6 +13,9 @@ public class CliUi implements Ui {
 
     private static final String WELCOME_MESSAGE =
             "Welcome to ManhwaDex Lite! Type `help` to see available commands.";
+    private static final String ONBOARDING_WELCOME_MESSAGE =
+            "Welcome to ManhwaDex Lite! Follow the onboarding process to register "
+                    + "your preferences!";
 
     private final Scanner scanner;
     private final PrintStream out;
@@ -36,6 +39,14 @@ public class CliUi implements Ui {
     @Override
     public void showWelcome() {
         out.println(WELCOME_MESSAGE);
+    }
+
+    /**
+     * Prints the first-time onboarding welcome message.
+     */
+    @Override
+    public void showOnboardingWelcome() {
+        out.println(ONBOARDING_WELCOME_MESSAGE);
     }
 
     /**
