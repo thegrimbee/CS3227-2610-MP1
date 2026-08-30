@@ -276,7 +276,7 @@ disabled in packaged production execution unless Java is started with `-ea`.
 ### 6.1 Automated tests
 
 The JUnit 5 suite is under `src/test/java/manhwa`. At the time this guide was written, the clean
-build ran 122 tests successfully. Coverage is organized by responsibility:
+build ran all tests successfully. Coverage is organized by responsibility:
 
 - parser and enum validation: `ParserTest`, `AspectTest`, `StatusTest`;
 - domain calculations and collection behavior: `ManhwaTest`, `PreferenceProfileTest`,
@@ -329,10 +329,7 @@ java -jar build/libs/manhwadexlite.jar --cli
 ```
 
 The `text-ui-test` input and expected transcript cover startup onboarding, adding an ongoing
-entry, list, score sort, statistics, and exit. However, the current `runtest.bat` and
-`runtest.sh` invoke the fat JAR without `--cli`. Since `Launcher` now defaults to Swing, the
-scripts must add `--cli` to the `java -jar` command before they can serve as unattended tests.
-That correction is not part of the documentation-only change that introduced this guide.
+entry, list, score sort, statistics, and exit.
 
 ## 7. Software engineering process
 
