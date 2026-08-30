@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import manhwa.Aspect;
 import manhwa.Manhwa;
 import manhwa.PreferenceProfile;
 
@@ -12,6 +13,8 @@ final class DisplayUtil {
     private static final String TAG_PREFIX = "#";
     private static final String SCORE_PREFIX = "Score: ";
     private static final String UNAVAILABLE_DISPLAY = "-";
+    private static final String DETAIL_INDENT = "   ";
+    private static final String BREAKDOWN_INDENT = "      ";
 
     private DisplayUtil() {
     }
@@ -40,6 +43,87 @@ final class DisplayUtil {
                     .append(formatEntry(entries.get(index), profile));
         }
         return result.toString();
+    }
+
+    static String formatDetailedEntries(
+            String header, List<Manhwa> entries, PreferenceProfile profile) {
+        assert header != null;
+        assert entries != null;
+        StringBuilder result = new StringBuilder(header);
+        for (int index = 0; index < entries.size(); index++) {
+            result.append(System.lineSeparator())
+                    .append(index + 1)
+                    .append(". ")
+                    .append(formatDetailedEntry(entries.get(index), profile));
+            if (index < entries.size() - 1) {
+                result.append(System.lineSeparator());
+            }
+        }
+        return result.toString();
+    }
+
+    private static String formatDetailedEntry(
+            Manhwa manhwa, PreferenceProfile profile) {
+        assert manhwa != null;
+        String lineSeparator = System.lineSeparator();
+        String tags = manhwa.getTags().isEmpty()
+                ? UNAVAILABLE_DISPLAY : formatTags(manhwa);
+        String note = manhwa.getNote() == null
+                ? UNAVAILABLE_DISPLAY : manhwa.getNote();
+        StringBuilder result = new StringBuilder(manhwa.getTitle())
+                .append(lineSeparator).append(DETAIL_INDENT)
+                .append("Status: ").append(manhwa.getStatus().getDisplayName())
+                .append(lineSeparator).append(DETAIL_INDENT)
+                .append("Date added: ").append(manhwa.getDateAdded())
+                .append(lineSeparator).append(DETAIL_INDENT)
+                .append("Chapters: ").append(manhwa.getChapterDisplay())
+                .append(lineSeparator).append(DETAIL_INDENT)
+                .append("Tags: ").append(tags)
+                .append(lineSeparator).append(DETAIL_INDENT)
+                .append("Note: ").append(note)
+                .append(lineSeparator).append(DETAIL_INDENT)
+                .append("Score breakdown:");
+        appendScoreBreakdown(result, manhwa, profile);
+        return result.toString();
+    }
+
+    private static void appendScoreBreakdown(
+            StringBuilder result, Manhwa manhwa, PreferenceProfile profile) {
+        assert result != null;
+        assert manhwa != null;
+        int weightedTotal = 0;
+        int weightTotal = 0;
+        for (Aspect aspect : Aspect.values()) {
+            Integer rating = manhwa.getRating(aspect);
+            result.append(System.lineSeparator()).append(BREAKDOWN_INDENT)
+                    .append(aspect.getDisplayName())
+                    .append(": rating ")
+                    .append(rating == null ? UNAVAILABLE_DISPLAY : rating)
+                    .append(", weight ");
+            if (profile == null) {
+                result.append(UNAVAILABLE_DISPLAY)
+                        .append(", contribution ").append(UNAVAILABLE_DISPLAY);
+            } else {
+                int weight = profile.getWeight(aspect);
+                result.append(weight).append(", contribution ");
+                if (rating == null) {
+                    result.append(UNAVAILABLE_DISPLAY);
+                } else {
+                    int contribution = rating * weight;
+                    weightedTotal += contribution;
+                    weightTotal += weight;
+                    result.append(contribution);
+                }
+            }
+        }
+        result.append(System.lineSeparator()).append(DETAIL_INDENT)
+                .append("Overall score: ");
+        if (profile == null || weightTotal == 0) {
+            result.append(UNAVAILABLE_DISPLAY);
+        } else {
+            result.append(weightedTotal).append(" / ").append(weightTotal)
+                    .append(" = ").append(formatScore(manhwa, profile));
+        }
     }
 
     private static String formatTags(Manhwa manhwa) {

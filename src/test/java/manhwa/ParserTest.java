@@ -14,6 +14,7 @@ import manhwa.commands.Command;
 import manhwa.commands.DeleteCommand;
 import manhwa.commands.FindCommand;
 import manhwa.commands.FilterCommand;
+import manhwa.commands.ListAllCommand;
 import manhwa.commands.ListCommand;
 import manhwa.commands.TagCommand;
 import manhwa.commands.UntagCommand;
@@ -86,6 +87,22 @@ class ParserTest {
     @Test
     void parseCommand_missingFindKeyword_throwsExpectedFormatMessage() {
         assertInvalidCommand("find", "Invalid find command. Expected format: find <keyword>.");
+    }
+
+    @Test
+    void parseCommand_listAllWithoutArguments_returnsListAllCommand()
+            throws ManhwaTrackerException {
+        assertInstanceOf(ListAllCommand.class, Parser.parseCommand("listall"));
+    }
+
+    @Test
+    void parseCommand_listAllWithArguments_throwsExpectedFormatMessage() {
+        ManhwaTrackerException exception = assertThrows(
+                ManhwaTrackerException.class, () -> Parser.parseCommand("listall ongoing"));
+
+        assertEquals(
+                "Invalid listall command. Expected format: listall.",
+                exception.getMessage());
     }
 
     @Test

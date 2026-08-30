@@ -220,6 +220,19 @@ Example row:
 No progress is displayed as `-/-`. A known current chapter without a total is displayed as
 `ch. 12`.
 
+### `listall`
+
+Shows the full details of every entry in permanent list order.
+
+```text
+listall
+```
+
+For each manhwa, the detailed view includes its title, status, date added, chapter progress,
+tags, note, and every aspect rating. The score breakdown shows each rating's preference weight
+and weighted contribution, followed by the weighted total calculation. Missing values are shown
+as `-`.
+
 ### `find`
 
 Finds titles containing a keyword or phrase, without regard to case.

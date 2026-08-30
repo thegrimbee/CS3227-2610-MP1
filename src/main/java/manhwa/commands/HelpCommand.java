@@ -38,6 +38,7 @@ public class HelpCommand extends Command {
                 OnboardCommand.COMMAND_WORD,
                 AddCommand.COMMAND_WORD + " <title>",
                 ListCommand.COMMAND_WORD + " [status]",
+                ListAllCommand.COMMAND_WORD,
                 FindCommand.COMMAND_WORD + " <keyword>",
                 FilterCommand.COMMAND_WORD + " <tag>",
                 SortCommand.COMMAND_WORD + " " + getSortKeyOptions(),

@@ -19,6 +19,7 @@ import manhwa.commands.DeleteCommand;
 import manhwa.commands.FilterCommand;
 import manhwa.commands.FindCommand;
 import manhwa.commands.HelpCommand;
+import manhwa.commands.ListAllCommand;
 import manhwa.commands.ListCommand;
 import manhwa.commands.NoteCommand;
 import manhwa.commands.OnboardCommand;
@@ -44,6 +45,7 @@ class HelpCommandTest {
                 OnboardCommand.COMMAND_WORD,
                 AddCommand.COMMAND_WORD + " <title>",
                 ListCommand.COMMAND_WORD + " [status]",
+                ListAllCommand.COMMAND_WORD,
                 FindCommand.COMMAND_WORD + " <keyword>",
                 FilterCommand.COMMAND_WORD + " <tag>",
                 SortCommand.COMMAND_WORD + " <score|title|date|chapters|plot|art|"

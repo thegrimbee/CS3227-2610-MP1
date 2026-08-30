@@ -9,6 +9,7 @@ import manhwa.commands.DeleteCommand;
 import manhwa.commands.FindCommand;
 import manhwa.commands.FilterCommand;
 import manhwa.commands.HelpCommand;
+import manhwa.commands.ListAllCommand;
 import manhwa.commands.ListCommand;
 import manhwa.commands.NoteCommand;
 import manhwa.commands.OnboardCommand;
@@ -28,6 +29,8 @@ public final class Parser {
             "Unknown command. Type `help` to see available commands.";
     private static final String INVALID_LIST_MESSAGE =
             "Invalid list command. Expected format: list [status].";
+    private static final String INVALID_LIST_ALL_MESSAGE =
+            "Invalid listall command. Expected format: listall.";
     private static final String INVALID_DELETE_MESSAGE =
             "Invalid delete command. Expected format: delete <index>.";
     private static final String INVALID_FIND_MESSAGE =
@@ -84,6 +87,7 @@ public final class Parser {
         case CancelCommand.COMMAND_WORD -> parseCancelCommand(input);
         case ChapterCommand.COMMAND_WORD -> parseChapterCommand(input);
         case ListCommand.COMMAND_WORD -> parseListCommand(input);
+        case ListAllCommand.COMMAND_WORD -> parseListAllCommand(input);
         case DeleteCommand.COMMAND_WORD -> parseDeleteCommand(input);
         case FilterCommand.COMMAND_WORD -> parseFilterCommand(input);
         case FindCommand.COMMAND_WORD -> parseFindCommand(input);
@@ -257,6 +261,11 @@ public final class Parser {
             throw new ManhwaTrackerException(INVALID_LIST_MESSAGE);
         }
         return new ListCommand(Status.fromString(arguments));
+    }
+
+    private static Command parseListAllCommand(String input) throws ManhwaTrackerException {
+        validateNoArguments(input, INVALID_LIST_ALL_MESSAGE);
+        return new ListAllCommand();
     }
 
     private static Command parseDeleteCommand(String input) throws ManhwaTrackerException {

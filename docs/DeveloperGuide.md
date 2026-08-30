@@ -143,12 +143,14 @@ Commands by responsibility:
 | Category | Commands |
 |---|---|
 | Flow and lifecycle | `onboard`, `rerank`, `add`, `cancel`, `bye` |
-| Read-only views | `list`, `find`, `filter`, `sort`, `stats`, `help` |
+| Read-only views | `list`, `listall`, `find`, `filter`, `sort`, `stats`, `help` |
 | Entry mutations | `delete`, `status`, `rate`, `chapter`, `tag`, `untag`, `note` |
 
-`DisplayUtil` is package-private and centralizes list-row and score formatting. Sorted and
-filtered views are copies. They are renumbered for display but do not alter the underlying list;
-index-based mutations always address the stored list order.
+`DisplayUtil` is package-private and centralizes compact list-row, detailed-entry, and score
+formatting. The `listall` view includes every entry field and the rating, weight, and weighted
+contribution for each aspect. Sorted and filtered views are copies. They are renumbered for
+display but do not alter the underlying list; index-based mutations always address the stored
+list order.
 
 ### 3.5 Domain model
 

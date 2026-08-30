@@ -29,6 +29,7 @@ The fixed aspect set is: `plot`, `art`, `uniqueness`, `characters`, `pacing`.
 | `onboard` | `onboard` | Starts onboarding flow (§4): prompts for importance 1–5 per aspect. Creates/overwrites the preference profile. |
 | `add` | `add <title>` | Starts add flow: asks `wishlist / ongoing / completed`. If ongoing/completed, prompts for a 1–10 rating per aspect. Title is case-insensitive unique. |
 | `list` | `list` / `list <status>` | Lists all entries, or only those with the given status. Shows index, status, title, tags, chapters, overall score. |
+| `listall` | `listall` | Lists every entry in stored order with its full fields and a per-aspect breakdown of rating, preference weight, weighted contribution, and overall score. |
 | `find` | `find <keyword>` | Case-insensitive substring match on title. |
 | `filter` | `filter <tag>` | Lists entries carrying the given tag. |
 | `sort` | `sort <score\|title\|date\|chapters\|plot\|art\|uniqueness\|characters\|pacing>` | Sorts the displayed list. Score/date/chapters/aspect = descending; title = alphabetical. Unrated entries sort last for score/aspect sorts. |
