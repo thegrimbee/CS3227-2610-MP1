@@ -109,7 +109,6 @@ Implemented:
 - CLI loop through CliUi
 - Startup IOException handling
 build.gradle already specified manhwa.CliMain, so it did not require modification.
-All 49 tests passed. The CLI smoke test confirmed blank, unknown, and bye responses.
 8. List, delete, and find commands
 You requested:
 - ListCommand
@@ -127,3 +126,32 @@ Implemented:
 - Persistent deletion
 - Required success and error messages
 - Parser validation for all three formats
+9. Multi-turn add and cancel flows with status and rating prompts.
+10. Preference onboarding and reranking.
+Implemented:
+  - Automatic onboarding when no saved profile exists.
+  - Onboarding greeting.
+  - Reminder that onboard can change scoring preferences.
+11. Rating and status updates, including prompting for missing ratings.
+12. Sorting by supported keys.
+13. Tagging, untagging, and tag filtering.
+14. Reading-progress commands:
+Implemented:
+  - Show, update current, or update current/total chapters.
+  - Update confirmations include the manhwa title.
+15. Free-text notes:
+Implemented:
+  - Set, show, clear, persist, and reject |.
+16. help, listing every currently implemented command.
+17.  stats, producing eight aggregate lines for counts, averages, chapters, top scores, tags, and priorities.
+18. Scripted text-UI test- Created text-ui-test/input.txt, EXPECTED.TXT, runtest.bat, and runtest.sh.
+Implemented:
+- Covered onboarding, adding and rating Solo Leveling, listing, sorting, statistics, and exiting.
+- Derived expected output statically from the source.
+- Fixed the scripts’ Gradle invocation by adding -p .. so Gradle uses the repository root.
+19. Swing desktop GUI- Added MainWindow.java with a read-only conversation log and command input field.
+Implemented:
+- Added Launcher.java, which launches the GUI by default and delegates to CliMain when --cli is present.
+- Changed build.gradle’s main class to manhwa.Launcher.
+- Kept all business logic in the existing ManhwaTracker.
+- Identified that the text-UI scripts now require --cli in their JAR invocation, but did not change them because they were outside that feature’s permitted files.
