@@ -58,6 +58,7 @@ class StorageTest {
                 () -> assertEquals(original.getCurrentChapter(), restored.getCurrentChapter()),
                 () -> assertEquals(original.getTotalChapter(), restored.getTotalChapter()),
                 () -> assertEquals(original.getNote(), restored.getNote()),
+                () -> assertEquals(original.getDateAdded(), restored.getDateAdded()),
                 () -> assertProfileEquals(profile, result.getPreferenceProfile()));
     }
 

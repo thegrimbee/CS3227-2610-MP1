@@ -51,6 +51,6 @@ public class SortCommand extends Command {
         PreferenceProfile sortingProfile = profile == null
                 ? new PreferenceProfile() : profile;
         List<Manhwa> sortedEntries = list.sortedView(sortKey, sortingProfile);
-        return DisplayUtil.formatEntries(LIST_HEADER, sortedEntries, profile);
+        return DisplayUtil.formatEntries(LIST_HEADER, sortedEntries, profile, list);
     }
 }

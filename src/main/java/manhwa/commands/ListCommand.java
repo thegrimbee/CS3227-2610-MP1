@@ -58,7 +58,7 @@ public class ListCommand extends Command {
         if (entries.isEmpty()) {
             return EMPTY_LIST_MESSAGE;
         }
-        return DisplayUtil.formatEntries(LIST_HEADER, entries, profile);
+        return DisplayUtil.formatEntries(LIST_HEADER, entries, profile, list);
     }
 
     private List<Manhwa> getSelectedEntries(ManhwaList list) throws ManhwaTrackerException {

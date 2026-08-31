@@ -6,6 +6,7 @@ import java.util.Locale;
 
 import manhwa.Aspect;
 import manhwa.Manhwa;
+import manhwa.ManhwaList;
 import manhwa.PreferenceProfile;
 
 final class DisplayUtil {
@@ -32,29 +33,38 @@ final class DisplayUtil {
     }
 
     static String formatEntries(
-            String header, List<Manhwa> entries, PreferenceProfile profile) {
+            String header, List<Manhwa> entries, PreferenceProfile profile,
+            ManhwaList sourceList) {
         assert header != null;
         assert entries != null;
+        assert sourceList != null;
         StringBuilder result = new StringBuilder(header);
-        for (int index = 0; index < entries.size(); index++) {
+        for (Manhwa entry : entries) {
+            int permanentIndex = sourceList.getIndexOf(entry);
+            assert permanentIndex > 0;
             result.append(System.lineSeparator())
-                    .append(index + 1)
+                    .append(permanentIndex)
                     .append(". ")
-                    .append(formatEntry(entries.get(index), profile));
+                    .append(formatEntry(entry, profile));
         }
         return result.toString();
     }
 
     static String formatDetailedEntries(
-            String header, List<Manhwa> entries, PreferenceProfile profile) {
+            String header, List<Manhwa> entries, PreferenceProfile profile,
+            ManhwaList sourceList) {
         assert header != null;
         assert entries != null;
+        assert sourceList != null;
         StringBuilder result = new StringBuilder(header);
         for (int index = 0; index < entries.size(); index++) {
+            Manhwa entry = entries.get(index);
+            int permanentIndex = sourceList.getIndexOf(entry);
+            assert permanentIndex > 0;
             result.append(System.lineSeparator())
-                    .append(index + 1)
+                    .append(permanentIndex)
                     .append(". ")
-                    .append(formatDetailedEntry(entries.get(index), profile));
+                    .append(formatDetailedEntry(entry, profile));
             if (index < entries.size() - 1) {
                 result.append(System.lineSeparator());
             }

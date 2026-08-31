@@ -44,6 +44,6 @@ public class ListAllCommand extends Command {
         for (int index = 1; index <= list.size(); index++) {
             entries.add(list.get(index));
         }
-        return DisplayUtil.formatDetailedEntries(LIST_HEADER, entries, profile);
+        return DisplayUtil.formatDetailedEntries(LIST_HEADER, entries, profile, list);
     }
 }

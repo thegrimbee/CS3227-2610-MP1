@@ -138,16 +138,16 @@ entry displayed before a profile exists, shows `Score: -`.
 - Entry indices are 1-based.
 - Titles are unique without regard to case. `Solo Leveling` and `solo leveling` are duplicates.
 - Titles and notes cannot contain `|`.
-- Tags are single words, are case-sensitive, and cannot contain whitespace or `|`.
+- Tags are single words, are case-sensitive, and cannot contain whitespace, `,`, or `|`.
 - `find` title matching is case-insensitive.
 - During an interactive prompt, `cancel` is case-insensitive.
 - Commands entered while a prompt is active are treated as answers to that prompt. Finish or
   cancel the flow before entering another command.
 
-> **Index warning:** Mutating commands use the permanent index shown by a plain `list` command.
-> Results from `find`, `filter`, and `sort` are renumbered display views and do not change the
-> stored order. Run `list` before `delete`, `status`, `rate`, `chapter`, `tag`, `untag`, or
-> `note` if there is any doubt about an entry's permanent index.
+> **Permanent indices:** Every list, search, filter, and sort result shows the entry's permanent
+> stored-list index. Result numbers may therefore be reordered or non-consecutive, but the
+> displayed number can be used directly with `delete`, `status`, `rate`, `chapter`, `tag`,
+> `untag`, or `note`.
 
 ## 6. Command reference
 
@@ -208,7 +208,7 @@ list
 list ongoing
 ```
 
-Each row contains a display index, status, title, optional tags, chapter progress, and overall
+Each row contains the permanent entry index, status, title, optional tags, chapter progress, and overall
 score. Notes and individual aspect ratings are not shown in this view.
 
 Example row:
@@ -276,8 +276,7 @@ The order is:
 - Unrated entries appear last for an aspect sort. They also sort below rated entries for
   `score` because their internal score is negative.
 
-`date` means the in-memory creation date. The current storage file does not persist this date;
-after a restart, loaded entries receive the current date and commonly tie with one another.
+`date` means the persisted creation date, so date ordering remains stable across restarts.
 
 ### `delete`
 
@@ -490,13 +489,6 @@ fat JAR with `--cli`, then perform this sequence:
 6. Run `bye` and confirm the process exits.
 7. Launch again from the same directory and run `list` to confirm persistence.
 
-### Current scripted-test limitation
-
-The repository contains `text-ui-test/runtest.bat` and `runtest.sh`, but the current scripts
-invoke the GUI-default launcher without `--cli`. Until their JAR invocation is updated to add
-`--cli`, use the direct CLI launch and manual smoke test above. Running the scripts unchanged
-may open the GUI instead of consuming `input.txt`.
-
 ## 9. Troubleshooting
 
 ### The GUI does not appear
@@ -515,7 +507,8 @@ the earlier session and check for `data/manhwalist.txt` there.
 An interactive flow is still active. Enter the requested value or enter `cancel`, then run the
 command again.
 
-### An index changed after sorting or filtering
+### Result numbers are reordered or non-consecutive
 
-Sorted and filtered results are display-only views. Run plain `list` and use its permanent
-index for commands that modify an entry.
+Sorted, searched, and filtered results retain each entry's permanent index while changing which
+entries are shown or their display order. Use the displayed number directly with a mutating
+command.

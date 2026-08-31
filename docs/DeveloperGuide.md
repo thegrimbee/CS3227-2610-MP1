@@ -148,9 +148,9 @@ Commands by responsibility:
 
 `DisplayUtil` is package-private and centralizes compact list-row, detailed-entry, and score
 formatting. The `listall` view includes every entry field and the rating, weight, and weighted
-contribution for each aspect. Sorted and filtered views are copies. They are renumbered for
-display but do not alter the underlying list; index-based mutations always address the stored
-list order.
+contribution for each aspect. Sorted, searched, and filtered views are copies. `DisplayUtil`
+resolves every displayed entry back to its permanent 1-based stored-list index, so reordered or
+subset views remain safe to use with index-based mutations without changing underlying order.
 
 ### 3.5 Domain model
 
@@ -161,7 +161,7 @@ case-insensitive parsing of their display names.
 
 `Manhwa` owns:
 
-- an immutable title and in-memory `dateAdded`;
+- an immutable title and persisted `dateAdded`;
 - mutable status;
 - an `EnumMap<Aspect, Integer>` of optional ratings;
 - current and total chapter integers;
@@ -222,25 +222,26 @@ The optional profile record appears first:
 PREF | plot=5 | art=4 | uniqueness=3 | characters=4 | pacing=2
 ```
 
-Each entry currently has exactly seven fields:
+Each newly written entry has exactly eight fields:
 
 ```text
-MANHWA | <title> | <STATUS> | <comma tags> | <semicolon ratings> | <current>/<total> | <note>
+MANHWA | <title> | <STATUS> | <comma tags> | <semicolon ratings> | <current>/<total> | <note> | <dateAdded>
 ```
 
 Example:
 
 ```text
-MANHWA | Solo Leveling | ONGOING | action,fantasy | plot=9;art=10;uniqueness=8;characters=7;pacing=8 | 143/179 | The art carries the story
+MANHWA | Solo Leveling | ONGOING | action,fantasy | plot=9;art=10;uniqueness=8;characters=7;pacing=8 | 143/179 | The art carries the story | 2026-08-31
 ```
 
 Empty tags, ratings, and notes are represented by empty fields. No chapter progress is `0/0`.
 Status is serialized with the uppercase enum name. Ratings are serialized in the fixed aspect
 order. Because commas delimit tags, user-entered tags cannot contain commas, pipes, or
-whitespace.
+whitespace. `dateAdded` uses ISO-8601 `yyyy-MM-dd` format.
 
-`dateAdded` is not included in the actual storage record. Deserialization constructs a new
-`Manhwa`, so loaded entries receive `LocalDate.now()`.
+For backward compatibility, the parser also accepts legacy seven-field MANHWA records. Because
+those records have no historical date, they receive `LocalDate.now()` when loaded and are
+migrated to the eight-field format on the next successful save.
 
 ### 4.2 Loading and corruption handling
 
@@ -384,13 +385,8 @@ serialization, model parsing, `StorageTest`, sample records, and both guides.
 
 - `MainWindow` calls the controller directly; the `SwingUi`/`SwingMain` sketch in
   `Guidelines.md` is not implemented. This was a deliberate later feature decision.
-- MANHWA records have seven fields and do not persist `dateAdded`, although the broader guideline
-  describes a date field. Consequently, `sort date` cannot preserve original creation dates
-  across restarts.
 - A hyphen (`-`) and `-/-` are used for unavailable scores and chapters instead of an em dash to
   avoid the CLI display problem recorded in project history.
-- Sorted, searched, and filtered views use local display numbering. Index-based commands still
-  use permanent stored-list indices.
 - The text-UI scripts need `--cli` after the launcher changed to GUI-by-default.
 - The GUI has manual smoke coverage only and performs storage operations on the Swing event
   dispatch thread. This is acceptable for the intended small local file but would not scale to

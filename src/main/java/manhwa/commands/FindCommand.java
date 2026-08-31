@@ -50,6 +50,6 @@ public class FindCommand extends Command {
         if (matches.isEmpty()) {
             return NO_MATCH_PREFIX + keyword + NO_MATCH_SUFFIX;
         }
-        return DisplayUtil.formatEntries(FIND_HEADER, matches, profile);
+        return DisplayUtil.formatEntries(FIND_HEADER, matches, profile, list);
     }
 }

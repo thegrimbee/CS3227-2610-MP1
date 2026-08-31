@@ -3,6 +3,7 @@ package manhwa;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -36,7 +37,8 @@ public class Manhwa {
     private static final int NO_CHAPTER = 0;
     private static final int SCORE_DECIMAL_PLACES = 1;
     private static final double NO_OVERALL_SCORE = -1.0;
-    private static final int MANHWA_FIELD_COUNT = 7;
+    private static final int LEGACY_MANHWA_FIELD_COUNT = 7;
+    private static final int MANHWA_FIELD_COUNT = 8;
 
     private final String title;
     private Status status;
@@ -54,11 +56,23 @@ public class Manhwa {
      * @param status initial reading status
      */
     public Manhwa(String title, Status status) {
+        this(title, status, LocalDate.now());
+    }
+
+    /**
+     * Creates a manhwa with a specified creation date and no optional data.
+     *
+     * @param title title of the manhwa
+     * @param status initial reading status
+     * @param dateAdded date on which the entry was created
+     */
+    public Manhwa(String title, Status status, LocalDate dateAdded) {
         assert title != null;
         assert status != null;
+        assert dateAdded != null;
         this.title = title;
         this.status = status;
-        this.dateAdded = LocalDate.now();
+        this.dateAdded = dateAdded;
         this.ratings = new EnumMap<>(Aspect.class);
         this.tags = new ArrayList<>();
     }
@@ -278,7 +292,8 @@ public class Manhwa {
                 serializeTags(),
                 serializeRatings(),
                 currentChapter + CHAPTER_SEPARATOR + totalChapter,
-                note == null ? "" : note);
+                note == null ? "" : note,
+                dateAdded.toString());
     }
 
     /**
@@ -291,21 +306,28 @@ public class Manhwa {
     public static Manhwa fromFileString(String line) throws ManhwaTrackerException {
         assert line != null;
         String[] fields = line.split("\\|", -1);
-        if (fields.length != MANHWA_FIELD_COUNT || !FILE_TYPE.equals(fields[0].trim())
+        if (!hasSupportedFieldCount(fields.length) || !FILE_TYPE.equals(fields[0].trim())
                 || fields[1].trim().isEmpty()) {
             throw malformedLine(line);
         }
 
         try {
-            Manhwa manhwa = new Manhwa(fields[1].trim(), Status.fromString(fields[2].trim()));
+            LocalDate storedDate = fields.length == MANHWA_FIELD_COUNT
+                    ? LocalDate.parse(fields[7].trim()) : LocalDate.now();
+            Manhwa manhwa = new Manhwa(
+                    fields[1].trim(), Status.fromString(fields[2].trim()), storedDate);
             parseTags(fields[3].trim(), manhwa, line);
             parseRatings(fields[4].trim(), manhwa, line);
             parseChapters(fields[5].trim(), manhwa, line);
             manhwa.setNote(fields[6].trim().isEmpty() ? null : fields[6].trim());
             return manhwa;
-        } catch (NumberFormatException exception) {
+        } catch (NumberFormatException | DateTimeParseException exception) {
             throw malformedLine(line);
         }
+    }
+
+    private static boolean hasSupportedFieldCount(int fieldCount) {
+        return fieldCount == LEGACY_MANHWA_FIELD_COUNT || fieldCount == MANHWA_FIELD_COUNT;
     }
 
     private boolean isValidTag(String tag) {

@@ -72,6 +72,22 @@ public class ManhwaList {
     }
 
     /**
+     * Returns the permanent 1-based index of an entry in this list.
+     *
+     * @param target entry whose index is requested
+     * @return permanent index, or 0 when the entry is not present
+     */
+    public int getIndexOf(Manhwa target) {
+        assert target != null;
+        for (int index = 0; index < entries.size(); index++) {
+            if (entries.get(index) == target) {
+                return index + FIRST_INDEX;
+            }
+        }
+        return 0;
+    }
+
+    /**
      * Replaces this list's contents with a loaded durable snapshot.
      *
      * @param source snapshot whose entries should become current

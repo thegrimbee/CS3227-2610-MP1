@@ -112,7 +112,7 @@ class TagCommandTest {
                 () -> assertTrue(matches.startsWith(
                         "Here are the entries with tag '#action':")),
                 () -> assertTrue(matches.contains("1. [COMPLETED] Solo Leveling")),
-                () -> assertTrue(matches.contains("2. [ONGOING] Doom Breaker")),
+                () -> assertTrue(matches.contains("3. [ONGOING] Doom Breaker")),
                 () -> assertEquals(
                         "No entries found with tag '#murim'.", noMatches));
     }

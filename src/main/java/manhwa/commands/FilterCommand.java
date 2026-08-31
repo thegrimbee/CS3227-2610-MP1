@@ -46,6 +46,6 @@ public class FilterCommand extends Command {
             return "No entries found with tag '#" + tag + "'.";
         }
         String header = "Here are the entries with tag '#" + tag + "':";
-        return DisplayUtil.formatEntries(header, matches, profile);
+        return DisplayUtil.formatEntries(header, matches, profile, list);
     }
 }

@@ -67,6 +67,20 @@ class ManhwaListTest {
     }
 
     @Test
+    void getIndexOf_returnsPermanentIndexOrZeroWhenAbsent()
+            throws ManhwaTrackerException {
+        Manhwa first = new Manhwa("First", Status.WISHLIST);
+        Manhwa second = new Manhwa("Second", Status.ONGOING);
+        Manhwa absent = new Manhwa("Absent", Status.COMPLETED);
+        ManhwaList list = listOf(first, second);
+
+        assertAll(
+                () -> assertEquals(1, list.getIndexOf(first)),
+                () -> assertEquals(2, list.getIndexOf(second)),
+                () -> assertEquals(0, list.getIndexOf(absent)));
+    }
+
+    @Test
     void getAndDelete_outOfRange_throwExceptionWithExactMessage()
             throws ManhwaTrackerException {
         ManhwaList list = listOf(new Manhwa("Only", Status.WISHLIST));

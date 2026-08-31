@@ -118,7 +118,8 @@ class ManhwaTest {
     @Test
     void fileString_populatedManhwa_roundTripsAllPersistedFields()
             throws ManhwaTrackerException {
-        Manhwa original = new Manhwa("Solo Leveling", Status.ONGOING);
+        LocalDate dateAdded = LocalDate.of(2024, 2, 20);
+        Manhwa original = new Manhwa("Solo Leveling", Status.ONGOING, dateAdded);
         original.addTag("action");
         original.addTag("fantasy");
         original.setRating(Aspect.PLOT, 9);
@@ -132,7 +133,7 @@ class ManhwaTest {
         assertAll(
                 () -> assertEquals(
                         "MANHWA | Solo Leveling | ONGOING | action,fantasy | plot=9;art=10 "
-                                + "| 143/179 | The art carries the story",
+                                + "| 143/179 | The art carries the story | 2024-02-20",
                         serialized),
                 () -> assertEquals(original.getTitle(), restored.getTitle()),
                 () -> assertEquals(original.getStatus(), restored.getStatus()),
@@ -143,11 +144,13 @@ class ManhwaTest {
                         restored.getRating(Aspect.ART)),
                 () -> assertEquals(original.getCurrentChapter(), restored.getCurrentChapter()),
                 () -> assertEquals(original.getTotalChapter(), restored.getTotalChapter()),
-                () -> assertEquals(original.getNote(), restored.getNote()));
+                () -> assertEquals(original.getNote(), restored.getNote()),
+                () -> assertEquals(dateAdded, restored.getDateAdded()));
     }
 
     @Test
-    void fileString_emptyOptionalFields_roundTripsDefaults() throws ManhwaTrackerException {
+    void fromFileString_legacyRecord_loadsAndMigratesWithCurrentDate()
+            throws ManhwaTrackerException {
         Manhwa restored = Manhwa.fromFileString(
                 "MANHWA | Tower of God | WISHLIST |  |  | 0/0 | ");
 
@@ -157,9 +160,21 @@ class ManhwaTest {
                 () -> assertEquals(0, restored.getCurrentChapter()),
                 () -> assertEquals(0, restored.getTotalChapter()),
                 () -> assertNull(restored.getNote()),
+                () -> assertEquals(LocalDate.now(), restored.getDateAdded()),
                 () -> assertEquals(
-                        "MANHWA | Tower of God | WISHLIST |  |  | 0/0 | ",
+                        "MANHWA | Tower of God | WISHLIST |  |  | 0/0 |  | "
+                                + restored.getDateAdded(),
                         restored.toFileString()));
+    }
+
+    @Test
+    void fromFileString_invalidStoredDate_throwsTrackerException() {
+        ManhwaTrackerException exception = assertThrows(
+                ManhwaTrackerException.class,
+                () -> Manhwa.fromFileString(
+                        "MANHWA | Tower of God | WISHLIST |  |  | 0/0 |  | yesterday"));
+
+        assertTrue(exception.getMessage().startsWith("Malformed manhwa data:"));
     }
 
     @Test

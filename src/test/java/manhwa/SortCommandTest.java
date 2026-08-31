@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.EnumMap;
@@ -28,8 +27,8 @@ class SortCommandTest {
                 "Bravo", LocalDate.of(2024, 1, 3), 5, 5, 9, 4, 8, 3);
         Manhwa charlie = createRatedManhwa(
                 "Charlie", LocalDate.of(2024, 1, 2), 20, 1, 5, 9, 4, 8);
-        Manhwa unrated = new Manhwa("Delta", Status.WISHLIST);
-        setDateAdded(unrated, LocalDate.of(2023, 12, 31));
+        Manhwa unrated = new Manhwa(
+                "Delta", Status.WISHLIST, LocalDate.of(2023, 12, 31));
         ManhwaList list = listWith(alpha, bravo, charlie, unrated);
         ManhwaTracker tracker = createTracker(list);
         Map<SortKey, List<String>> expectedOrders = expectedOrders();
@@ -57,9 +56,33 @@ class SortCommandTest {
         for (String key : List.of(
                 "score", "plot", "art", "uniqueness", "characters", "pacing")) {
             String response = tracker.getResponse("sort " + key);
-            assertTrue(response.lines().reduce((first, second) -> second).orElseThrow()
-                    .contains("] Unrated"), key);
+            List<String> lines = response.lines().toList();
+            assertTrue(lines.get(1).startsWith("2. "), key);
+            assertTrue(lines.get(1).contains("] Rated"), key);
+            assertTrue(lines.get(2).startsWith("1. "), key);
+            assertTrue(lines.get(2).contains("] Unrated"), key);
         }
+    }
+
+    @Test
+    void sort_dateAfterRestart_usesPersistedDatesAndPermanentIndices() throws Exception {
+        Manhwa older = new Manhwa(
+                "Older", Status.COMPLETED, LocalDate.of(2023, 6, 1));
+        Manhwa newer = new Manhwa(
+                "Newer", Status.ONGOING, LocalDate.of(2025, 2, 10));
+        Storage storage = new Storage(tempDirectory.toString());
+        storage.saveData(listWith(older, newer), new PreferenceProfile());
+        LoadResult reloaded = storage.loadData();
+        ManhwaTracker restartedTracker = new ManhwaTracker(
+                reloaded.getManhwaList(), reloaded.getPreferenceProfile(), storage);
+
+        String response = restartedTracker.getResponse("sort date");
+        List<String> lines = response.lines().toList();
+
+        assertEquals(LocalDate.of(2023, 6, 1), reloaded.getManhwaList().get(1).getDateAdded());
+        assertEquals(LocalDate.of(2025, 2, 10), reloaded.getManhwaList().get(2).getDateAdded());
+        assertTrue(lines.get(1).startsWith("2. [ONGOING] Newer"));
+        assertTrue(lines.get(2).startsWith("1. [COMPLETED] Older"));
     }
 
     @Test
@@ -87,8 +110,7 @@ class SortCommandTest {
 
     private static Manhwa createRatedManhwa(String title, LocalDate date, int chapter,
             int plot, int art, int uniqueness, int characters, int pacing) throws Exception {
-        Manhwa manhwa = new Manhwa(title, Status.COMPLETED);
-        setDateAdded(manhwa, date);
+        Manhwa manhwa = new Manhwa(title, Status.COMPLETED, date);
         manhwa.setChapters(chapter, 0);
         manhwa.setRating(Aspect.PLOT, plot);
         manhwa.setRating(Aspect.ART, art);
@@ -96,12 +118,6 @@ class SortCommandTest {
         manhwa.setRating(Aspect.CHARACTERS, characters);
         manhwa.setRating(Aspect.PACING, pacing);
         return manhwa;
-    }
-
-    private static void setDateAdded(Manhwa manhwa, LocalDate date) throws Exception {
-        Field dateAdded = Manhwa.class.getDeclaredField("dateAdded");
-        dateAdded.setAccessible(true);
-        dateAdded.set(manhwa, date);
     }
 
     private static ManhwaList listWith(Manhwa... entries) throws ManhwaTrackerException {
@@ -135,8 +151,20 @@ class SortCommandTest {
         assertEquals(LIST_HEADER, lines.get(0));
         assertEquals(expectedTitles.size() + 1, lines.size());
         for (int index = 0; index < expectedTitles.size(); index++) {
-            assertTrue(lines.get(index + 1).contains("] " + expectedTitles.get(index)),
-                    lines.get(index + 1));
+            String title = expectedTitles.get(index);
+            String displayedLine = lines.get(index + 1);
+            assertTrue(displayedLine.startsWith(getPermanentIndex(title) + ". "), displayedLine);
+            assertTrue(displayedLine.contains("] " + title), displayedLine);
         }
+    }
+
+    private static int getPermanentIndex(String title) {
+        return switch (title) {
+        case "Alpha" -> 1;
+        case "Bravo" -> 2;
+        case "Charlie" -> 3;
+        case "Delta" -> 4;
+        default -> throw new IllegalArgumentException("Unexpected title: " + title);
+        };
     }
 }

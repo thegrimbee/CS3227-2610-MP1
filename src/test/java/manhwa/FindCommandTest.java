@@ -21,8 +21,8 @@ class FindCommandTest {
         Manhwa tower = new Manhwa("Tower of God", Status.WISHLIST);
         ManhwaList list = new ManhwaList();
         list.add(solo);
-        list.add(max);
         list.add(tower);
+        list.add(max);
         Storage storage = new Storage(tempDirectory.toString());
         ManhwaTracker tracker = new ManhwaTracker(list, null, storage);
 
@@ -32,7 +32,7 @@ class FindCommandTest {
                 "Here are the matching entries in your list:" + System.lineSeparator()
                         + "1. [ONGOING] Solo Leveling  #action  -/-  Score: -"
                         + System.lineSeparator()
-                        + "2. [COMPLETED] The Max-Level Player  -/-  Score: -",
+                        + "3. [COMPLETED] The Max-Level Player  -/-  Score: -",
                 response);
     }
 
